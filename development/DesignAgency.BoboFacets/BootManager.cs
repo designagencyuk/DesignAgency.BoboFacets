@@ -25,7 +25,7 @@ namespace DesignAgency.BoboFacets
             }
         }
 
-        private void BrowserIndexer_DocumentWriting(IEnumerable<IFacetField> facetFields, object sender, Examine.LuceneEngine.DocumentWritingEventArgs e)
+        private void BrowserIndexer_DocumentWriting(IEnumerable<IFacetField> facetFields, object sender, DocumentWritingEventArgs e)
         {
             foreach (var facetField in facetFields)
             {
@@ -34,21 +34,10 @@ namespace DesignAgency.BoboFacets
                     var facetValue = e.Fields[facetField.Alias];
                     foreach (var value in facetField.PrepareForIndex(facetValue))
                     {
-                        AddAsFacetField(e, facetField.Alias, value);
+                        e.Document.Add(facetField.CreateIndexField(value));
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Adds field as new facet safe field (Not Analyzed)
-        /// </summary>
-        /// <param name="e">The <see cref="DocumentWritingEventArgs"/> instance containing the event data.</param>
-        /// <param name="fieldName">Name of the field.</param>
-        /// <param name="value">The value.</param>
-        private void AddAsFacetField(DocumentWritingEventArgs e, string fieldName, string value)
-        {
-            e.Document.Add(new Field(fieldName.FacetFieldAlias(), value.Trim(), Field.Store.YES, Field.Index.NOT_ANALYZED));
         }
     }
 }

@@ -3,6 +3,10 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BoboBrowse.Facets;
+using BoboBrowse.Facets.impl;
+using DesignAgency.BoboFacets.Domain;
+using Lucene.Net.Documents;
 using Umbraco.Core;
 using static BoboBrowse.Api.FacetSpec;
 using static BoboBrowse.Api.BrowseSelection;
@@ -36,6 +40,26 @@ namespace DesignAgency.BoboFacets.Models
             SelectionOperation = valueOperation;
         }
 
+        /// <summary>
+        /// Supports MultiValueFacetHandler & the SimpleFacetHandler
+        /// </summary>
+        /// <returns></returns>
+        // ReSharper disable once InheritdocConsiderUsage
+        public virtual FacetHandler CreateFacetHandler()
+        {
+            if (Multivalue)
+            {
+                return new MultiValueFacetHandler(Alias.FacetFieldAlias());
+            }
+            return new SimpleFacetHandler(Alias.FacetFieldAlias());
+        }
+
+        /// <summary>
+        /// Supports converting a csv value, Umbraco tags json value and a NuPicker json value.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        // ReSharper disable once InheritdocConsiderUsage
         public virtual IEnumerable<string> PrepareForIndex(string value)
         {
             if (!Multivalue)
@@ -61,6 +85,16 @@ namespace DesignAgency.BoboFacets.Models
             }
 
             return values;
+        }
+
+        public virtual Fieldable CreateIndexField(string fieldValue)
+        {
+            return new Field(Alias.FacetFieldAlias(), fieldValue.Trim(), Field.Store.YES, Field.Index.NOT_ANALYZED);
+        }
+
+        public virtual string CreateValueLabel(string value)
+        {
+            return value;
         }
     }
 }

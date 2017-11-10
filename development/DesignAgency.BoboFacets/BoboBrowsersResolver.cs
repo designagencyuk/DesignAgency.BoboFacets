@@ -15,9 +15,6 @@ namespace DesignAgency.BoboFacets
             : base(finders)
         { }
         
-        internal IEnumerable<IFacetBrowser> Browsers
-        {
-            get { return Values; }
-        }
+        internal IEnumerable<IFacetBrowser> Browsers => Values;
     }
 }

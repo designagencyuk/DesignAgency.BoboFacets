@@ -1,6 +1,5 @@
 ﻿using BoboBrowse.Api;
 using BoboBrowse.Facets;
-using BoboBrowse.Facets.impl;
 using DesignAgency.BoboFacets.Domain;
 using DesignAgency.BoboFacets.Models;
 using Examine;
@@ -40,15 +39,7 @@ namespace DesignAgency.BoboFacets.Services
                 foreach (var facetField in FacetFields)
                 {
                     var facetAlias = facetField.Alias.FacetFieldAlias();
-                    if (facetField.Multivalue)
-                    {
-                        facetHandlers.Add(new MultiValueFacetHandler(facetAlias));
-                    }
-                    else
-                    {
-                        facetHandlers.Add(new SimpleFacetHandler(facetAlias));
-                    }
-
+                    facetHandlers.Add(facetField.CreateFacetHandler());
                     var facetSpec = new FacetSpec
                     {
                         OrderBy = facetField.ValueOrderBy,
@@ -91,12 +82,18 @@ namespace DesignAgency.BoboFacets.Services
                     {
                         var facetName = selectedValue;
 
+                        var facetField = FacetFields.FirstOrDefault(x => selection.Key == x.Alias.FacetFieldAlias());
+
                         if (facetDisplayDictionaryValues != null)
                         {
                             if (facetDisplayDictionaryValues.ContainsKey(selection.Key) && facetDisplayDictionaryValues[selection.Key].ContainsKey(selectedValue))
                             {
                                 facetName = facetDisplayDictionaryValues[selection.Key][selectedValue];
                             }
+                        }
+                        else if (facetField != null)
+                        {
+                            facetName = facetField.CreateValueLabel(selectedValue);
                         }
 
                         var facetSel = new FacetSelection
@@ -139,10 +136,15 @@ namespace DesignAgency.BoboFacets.Services
 
                         if (facetDisplayDictionaryValues != null)
                         {
-                            if (facetDisplayDictionaryValues.ContainsKey(map.Key) && facetDisplayDictionaryValues[map.Key].ContainsKey(f.Value.ToString()))
+                            if (facetDisplayDictionaryValues.ContainsKey(map.Key) &&
+                                facetDisplayDictionaryValues[map.Key].ContainsKey(f.Value.ToString()))
                             {
                                 facetName = facetDisplayDictionaryValues[map.Key][f.Value.ToString()];
                             }
+                        }
+                        else if(facetField != null)
+                        {
+                            facetName = facetField.CreateValueLabel(f.Value.ToString());
                         }
 
                         var facet = new Facet

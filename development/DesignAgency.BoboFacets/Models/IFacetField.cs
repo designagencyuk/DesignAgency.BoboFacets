@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using BoboBrowse.Facets;
+using Lucene.Net.Documents;
 using static BoboBrowse.Api.BrowseSelection;
 using static BoboBrowse.Api.FacetSpec;
 
@@ -40,5 +42,25 @@ namespace DesignAgency.BoboFacets.Models
         /// <param name="value"></param>
         /// <returns></returns>
         IEnumerable<string> PrepareForIndex(string value);
+
+        /// <summary>
+        /// Returns the facet handler for this facet field
+        /// </summary>
+        /// <returns></returns>
+        FacetHandler CreateFacetHandler();
+
+        /// <summary>
+        /// Returns the index field
+        /// </summary>
+        /// <param name="fieldValue"></param>
+        /// <returns></returns>
+        Fieldable CreateIndexField(string fieldValue);
+
+        /// <summary>
+        /// Creates a readable label from the value
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        string CreateValueLabel(string value);
     }
 }
