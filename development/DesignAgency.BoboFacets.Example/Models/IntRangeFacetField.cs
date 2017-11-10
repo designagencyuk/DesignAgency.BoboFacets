@@ -12,7 +12,7 @@ namespace DesignAgency.BoboFacets.Example.Models
 {
     public class IntRangeFacetField : FacetField
     {
-        public IntRangeFacetField(string alias, string label, FacetSpec.FacetSortSpec valueOrderBy = FacetSpec.FacetSortSpec.OrderHitsDesc, bool expandSelection = true, int minHitCount = 0, BrowseSelection.ValueOperation valueOperation = BrowseSelection.ValueOperation.ValueOperationOr) : base(alias, label, false, valueOrderBy, expandSelection, minHitCount, valueOperation)
+        public IntRangeFacetField(string alias, string label, FacetSpec.FacetSortSpec valueOrderBy = FacetSpec.FacetSortSpec.OrderValueAsc, bool expandSelection = true, int minHitCount = 0, BrowseSelection.ValueOperation valueOperation = BrowseSelection.ValueOperation.ValueOperationOr) : base(alias, label, false, valueOrderBy, expandSelection, minHitCount, valueOperation)
         {
         }
 

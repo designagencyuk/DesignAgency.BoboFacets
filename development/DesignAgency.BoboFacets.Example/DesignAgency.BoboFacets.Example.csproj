@@ -347,7 +347,7 @@
   <ItemGroup>
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Models\ProductsViewModel.cs" />
-    <Compile Include="Models\DoubleRangeFacetField.cs" />
+    <Compile Include="Models\IntRangeFacetField.cs" />
     <Compile Include="MyBrowser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

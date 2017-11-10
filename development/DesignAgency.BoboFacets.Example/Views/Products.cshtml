@@ -31,7 +31,7 @@
                         <form action="@Model.Content.Url" method="get">
                             <select id="@facetField.Alias.FacetFieldAlias()" onchange="this.form.submit()" name="@facetField.Alias.FacetFieldAlias()" class="facet-control">
                                 <option value="">@facetField.Label</option>
-                                @foreach (var facetValue in facet.Facets.OrderBy(x => x.Label))
+                                @foreach (var facetValue in facet.Facets.OrderBy(x => x.Sort))
                                 {
                                     <option selected="@(Model.Content.FacetSelection.ContainsKey(facetField.Alias.FacetFieldAlias()) && (Model.Content.FacetSelection[facetField.Alias.FacetFieldAlias()].Select(x => x.Value).Contains(facetValue.Value)))" @(facetValue.Count > 0 ? "" : "disabled") value="@facetValue.Value">@facetValue.Label (@facetValue.Count)</option>
                                 }

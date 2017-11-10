@@ -129,11 +129,11 @@ namespace DesignAgency.BoboFacets.Services
                         Label = facetField?.Label,
                         Alias = map.Key
                     };
-
+                    var sortOrder = 0;
                     foreach (var f in map.Value.GetFacets())
                     {
                         var facetName = f.Value.ToString();
-
+                        sortOrder++;
                         if (facetDisplayDictionaryValues != null)
                         {
                             if (facetDisplayDictionaryValues.ContainsKey(map.Key) &&
@@ -151,7 +151,8 @@ namespace DesignAgency.BoboFacets.Services
                         {
                             Label = facetName,
                             Value = f.Value.ToString(),
-                            Count = f.HitCount
+                            Count = f.HitCount,
+                            Sort = sortOrder
                         };
                         group.Facets.Add(facet);
                     }

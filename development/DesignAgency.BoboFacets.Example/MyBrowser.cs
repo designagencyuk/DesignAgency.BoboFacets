@@ -8,7 +8,7 @@ namespace DesignAgency.BoboFacets.Example
 {
     public class MyBrowser : BaseBrowser
     {
-        public override IEnumerable<IFacetField> FacetFields => new List<FacetField>() { new FacetField("category", "Category", true), new DoubleRangeFacetField("price", "Price") };
+        public override IEnumerable<IFacetField> FacetFields => new List<FacetField>() { new FacetField("category", "Category", true), new IntRangeFacetField("price", "Price") };
 
         public override string SearchProvider => "ExternalSearcher";
 
