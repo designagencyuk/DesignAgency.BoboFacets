@@ -3,7 +3,6 @@ using DesignAgency.BoboFacets.Models;
 using Examine;
 using Examine.LuceneEngine;
 using Examine.LuceneEngine.Providers;
-using Lucene.Net.Documents;
 using System.Collections.Generic;
 using Umbraco.Core;
 

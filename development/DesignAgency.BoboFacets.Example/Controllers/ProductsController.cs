@@ -15,7 +15,7 @@ namespace DesignAgency.BoboFacets.Example.Controllers
             var browser = BrowseManager.Browser<MyBrowser>();
             var viewModel = new ProductsViewModel(model.Content);
 
-            var browserRequest = browser.ConvertBrowseRequest(Request.QueryString.AllKeys.SelectMany(Request.QueryString.GetValues, (k, v) => new KeyValuePair<string, string>(k, v)).ToList());
+            var browserRequest = browser.CreateBrowseRequest(Request.QueryString.AllKeys.SelectMany(Request.QueryString.GetValues, (k, v) => new KeyValuePair<string, string>(k, v)).ToList());
 
             viewModel.FacetSelection = browser.ConvertToFacetSelection(browserRequest.GetSelections());
 

@@ -191,7 +191,7 @@ namespace DesignAgency.BoboFacets.Services
         /// <param name="useOffset"></param>
         /// <param name="itemsPerPage"></param>
         /// <returns></returns>
-        public virtual BrowseRequest ConvertBrowseRequest(List<KeyValuePair<string, string>> querystring, int? page = null, bool useOffset = false, int itemsPerPage = 10)
+        public virtual BrowseRequest CreateBrowseRequest(List<KeyValuePair<string, string>> querystring, int? page = null, bool useOffset = false, int itemsPerPage = 10)
         {
             Query query = null;
             var compiledQuery = BuildBaseQuery(querystring);
