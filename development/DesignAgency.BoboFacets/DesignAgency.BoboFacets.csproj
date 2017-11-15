@@ -6,6 +6,9 @@
     <Description>A slim wrapper around BoboBrowse.Net framework</Description>
     <Authors>Tom Steer, Tom Jenks</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.1.0</Version>
+    <PackageLicenseUrl>http://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageTags>umbraco bobo facets</PackageTags>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="UmbracoCms.Core" Version="7.7.4" />
