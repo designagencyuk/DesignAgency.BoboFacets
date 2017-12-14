@@ -1,3 +1,5 @@
+<img height="100" src="icon.png" style="margin-bottom: 20px" alt="Umbraco Bobo Facets" title="Umbraco Bobo Facets">
+
 # Umbraco Bobo Facets
 
 Umbraco Bobo facets provides a wrapper around the BoboBrowse.NET framework and works alongside Examine to enable you to get faceted search setup and running in Umbraco with ease. It has been designed to be simple to setup but also extensible to 
