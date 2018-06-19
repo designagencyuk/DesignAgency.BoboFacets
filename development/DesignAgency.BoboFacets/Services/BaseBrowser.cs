@@ -239,5 +239,68 @@ namespace DesignAgency.BoboFacets.Services
 
             return browseRequest;
         }
+        /// <summary>
+        /// Creates a browser request from the passed in key value pair query string to handle a multirequest(ex. 2x f_category in query)
+        /// </summary>
+        /// <param name="querystring"></param>
+        /// <param name="page"></param>
+        /// <param name="useOffset"></param>
+        /// <param name="itemsPerPage"></param>
+        /// <returns></returns>
+        public virtual BrowseRequest CreateMultiBrowseRequest(List<KeyValuePair<string, string>> querystring, int? page = null, bool useOffset = false, int itemsPerPage = 10)
+        {
+            Query query = null;
+            var compiledQuery = BuildBaseQuery(querystring);
+            if (compiledQuery != null)
+            {
+                var luceneParams = compiledQuery as LuceneSearchCriteria;
+                query = luceneParams?.Query ?? throw new ArgumentException("Provided ISearchCriteria dos not match the allowed ISearchCriteria. Ensure you only use an ISearchCriteria created from the current SearcherProvider");
+            }
+
+            var offset = 0;
+            if (!page.HasValue)
+            {
+                page = 1;
+            }
+            var count = page.Value * itemsPerPage;
+
+            if (useOffset)
+            {
+                offset = (page.Value - 1) * itemsPerPage;
+                count = itemsPerPage;
+            }
+
+            var browseRequest = new BrowseRequest
+            {
+                Offset = offset,
+                Count = count,
+                Query = query,
+                FetchStoredFields = true,
+                Sort = DetermineSort(querystring)
+            };
+            var queryStringKeys = querystring.Select(x => x.Key);
+            foreach (var facetField in FacetFields.Where(x => queryStringKeys.Contains(x.Alias.FacetFieldAlias())))
+            {
+                var facetKvps = querystring.Where(x => x.Key == facetField.Alias.FacetFieldAlias());
+                foreach (var facetKvp in facetKvps)
+                {
+
+              
+                    var facetValue = facetKvp.Value;
+                    if (!string.IsNullOrWhiteSpace(facetValue))
+                    {
+                        var sel = browseRequest.GetSelection(facetKvp.Key) ?? new BrowseSelection(facetKvp.Key);
+                        sel.AddValue(facetValue);
+                        sel.SelectionOperation = facetField.SelectionOperation;
+                        browseRequest.RemoveSelection(facetKvp.Key);
+                        browseRequest.AddSelection(sel);
+                    }
+
+                }
+            }
+
+            return browseRequest;
+        }
+
     }
 }
