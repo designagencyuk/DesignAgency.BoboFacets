@@ -10,6 +10,7 @@ using Lucene.Net.Search;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DesignAgency.BoboFacets.FacetQueryStringParsers;
 
 namespace DesignAgency.BoboFacets.Services
 {
@@ -22,6 +23,18 @@ namespace DesignAgency.BoboFacets.Services
         public abstract string IndexProvider { get; }
 
         public abstract SortField[] DefaultSort { get; }
+
+        protected IFacetQueryStringParser QueryStringParser { get; }
+
+        protected BaseBrowser(IFacetQueryStringParser queryStringParser)
+        {
+            QueryStringParser = queryStringParser;
+        }
+
+        protected BaseBrowser() : this(new DefaultQueryStringParser())
+        {
+            
+        }
         
         /// <summary>
         /// Executes the browse request
@@ -222,17 +235,22 @@ namespace DesignAgency.BoboFacets.Services
                 FetchStoredFields = true,
                 Sort = DetermineSort(querystring)
             };
-            var queryStringKeys = querystring.Select(x => x.Key);
-            foreach (var facetField in FacetFields.Where(x => queryStringKeys.Contains(x.Alias.FacetFieldAlias())))
+
+            var facetSelection = QueryStringParser.ParseQueryString(querystring, FacetFields);
+            
+            foreach (var facetField in facetSelection)
             {
-                var facetKvp = querystring.FirstOrDefault(x => x.Key == facetField.Alias.FacetFieldAlias());
-                var facetValue = facetKvp.Value;
-                if (!string.IsNullOrWhiteSpace(facetValue))
+                if (facetField.Value.Any())
                 {
-                    var sel = browseRequest.GetSelection(facetKvp.Key) ?? new BrowseSelection(facetKvp.Key);
-                    sel.AddValue(facetValue);
-                    sel.SelectionOperation = facetField.SelectionOperation;
-                    browseRequest.RemoveSelection(facetKvp.Key);
+                    var sel = new BrowseSelection(facetField.Key.Alias.FacetFieldAlias());
+                    foreach (var selection in facetField.Value)
+                    {
+                        if (!string.IsNullOrEmpty(selection))
+                        {
+                            sel.AddValue(selection);
+                        }
+                    }
+                    sel.SelectionOperation = facetField.Key.SelectionOperation;
                     browseRequest.AddSelection(sel);
                 }
             }
