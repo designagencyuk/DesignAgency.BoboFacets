@@ -222,6 +222,9 @@
     <Compile Include="Domain\Constants.cs" />
     <Compile Include="Domain\PluginManagerExtensions.cs" />
     <Compile Include="Domain\StringExtensions.cs" />
+    <Compile Include="FacetQueryStringParsers\DefaultQueryStringParser.cs" />
+    <Compile Include="FacetQueryStringParsers\DelimiterQueryStringParser.cs" />
+    <Compile Include="FacetQueryStringParsers\IFacetQueryStringParser.cs" />
     <Compile Include="Models\Facet.cs" />
     <Compile Include="Models\FacetField.cs" />
     <Compile Include="Models\FacetGroup.cs" />
