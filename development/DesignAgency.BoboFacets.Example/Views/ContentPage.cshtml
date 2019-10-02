@@ -1,7 +1,7 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage<ContentModels.ContentPage>
-@using ContentModels = Umbraco.Web.PublishedContentModels;
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.ContentPage>
+@using ContentModels = Umbraco.Web.PublishedModels;
 @{
-    Layout = "Master.cshtml";
+    Layout = "master.cshtml";
 }
 
 @Html.Partial("~/Views/Partials/SectionHeader.cshtml")
@@ -18,7 +18,7 @@
 
         <div class="col-md-9">
             <article>
-                @Html.GetGridHtml(Model.Content, "bodyText", "bootstrap3-fluid")
+                @Html.GetGridHtml(Model, "bodyText", "bootstrap3-fluid")
             </article>
         </div>
     </div>

@@ -1,15 +1,14 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BoboBrowse.Facets;
-using BoboBrowse.Facets.impl;
-using DesignAgency.BoboFacets.Domain;
+using BoboBrowse.Net;
+using BoboBrowse.Net.Facets;
+using BoboBrowse.Net.Facets.Impl;
+using DesignAgency.BoboFacets.Extensions;
 using Lucene.Net.Documents;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Umbraco.Core;
-using static BoboBrowse.Api.FacetSpec;
-using static BoboBrowse.Api.BrowseSelection;
 
 namespace DesignAgency.BoboFacets.Models
 {
@@ -19,21 +18,23 @@ namespace DesignAgency.BoboFacets.Models
 
         public string Label { get; set; }
 
-        public bool Multivalue { get; set; }
+        public bool MultiValue { get; set; }
+        public bool CultureDependant { get; set; }
 
-        public FacetSortSpec ValueOrderBy { get; set; }
+        public FacetSpec.FacetSortSpec ValueOrderBy { get; set; }
 
         public bool ExpandSelection { get; set; }
 
         public int MinHitCount { get; set; }
 
-        public ValueOperation SelectionOperation { get; set; }
+        public BrowseSelection.ValueOperation SelectionOperation { get; set; }
 
-        public FacetField(string alias, string label, bool multiValue, FacetSortSpec valueOrderBy = FacetSortSpec.OrderHitsDesc, bool expandSelection = true, int minHitCount = 0, ValueOperation valueOperation = ValueOperation.ValueOperationOr)
+        public FacetField(string alias, string label, bool multiValue, bool cultureDependant = false, FacetSpec.FacetSortSpec valueOrderBy = FacetSpec.FacetSortSpec.OrderHitsDesc, bool expandSelection = true, int minHitCount = 0, BrowseSelection.ValueOperation valueOperation = BrowseSelection.ValueOperation.ValueOperationOr)
         {
             Alias = alias;
             Label = label;
-            Multivalue = multiValue;
+            MultiValue = multiValue;
+            CultureDependant = cultureDependant;
             ValueOrderBy = valueOrderBy;
             ExpandSelection = expandSelection;
             MinHitCount = minHitCount;
@@ -45,13 +46,13 @@ namespace DesignAgency.BoboFacets.Models
         /// </summary>
         /// <returns></returns>
         // ReSharper disable once InheritdocConsiderUsage
-        public virtual FacetHandler CreateFacetHandler()
+        public virtual IFacetHandler CreateFacetHandler(string cultureCode)
         {
-            if (Multivalue)
+            if (MultiValue)
             {
-                return new MultiValueFacetHandler(Alias.FacetFieldAlias());
+                return new MultiValueFacetHandler(this.CreateFacetFieldAlias(cultureCode));
             }
-            return new SimpleFacetHandler(Alias.FacetFieldAlias());
+            return new SimpleFacetHandler(this.CreateFacetFieldAlias(cultureCode));
         }
 
         /// <summary>
@@ -62,7 +63,7 @@ namespace DesignAgency.BoboFacets.Models
         // ReSharper disable once InheritdocConsiderUsage
         public virtual IEnumerable<string> PrepareForIndex(string value)
         {
-            if (!Multivalue)
+            if (!MultiValue)
                 return new[] { value };
 
             IEnumerable<string> values;
@@ -87,14 +88,19 @@ namespace DesignAgency.BoboFacets.Models
             return values;
         }
 
-        public virtual Fieldable CreateIndexField(string fieldValue)
+        public virtual IFieldable CreateIndexField(string fieldValue, string cultureCode)
         {
-            return new Field(Alias.FacetFieldAlias(), fieldValue.Trim(), Field.Store.YES, Field.Index.NOT_ANALYZED);
+            return new Field(this.CreateFacetFieldAlias(cultureCode), fieldValue.Trim(), Field.Store.YES, Field.Index.NOT_ANALYZED);
         }
 
         public virtual string CreateValueLabel(string value)
         {
             return value;
+        }
+
+        public virtual string CreateFacetFieldAlias(string cultureCode)
+        {
+            return this.FacetFieldAlias(cultureCode);
         }
     }
 }

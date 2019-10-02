@@ -1,39 +1,39 @@
-﻿@using DesignAgency.BoboFacets;
-@using DesignAgency.BoboFacets.Example;
-@using DesignAgency.BoboFacets.Domain;
-@inherits UmbracoTemplatePage<DesignAgency.BoboFacets.Example.Models.ProductsViewModel>
-@using ContentModels = Umbraco.Web.PublishedContentModels;
+﻿
+@using System.Threading
+@using DesignAgency.BoboFacets.Extensions;
+@inherits UmbracoViewPage<DesignAgency.BoboFacets.Example.Models.ProductsViewModel>
 @{
-    Layout = "Master.cshtml";
+    Layout = "master.cshtml";
 }
 @Html.Partial("~/Views/Partials/SectionHeader.cshtml")
-
 <section class="section">
 
     <div class="container">
 
         <!-- todo: implement category selector -->
         <!--
-            <nav class="nav-bar nav-bar--center nav-bar--air-bottom">
-                <a class="nav-link nav-link--black nav-link--active" href="">All</a>
-                <a class="nav-link nav-link--black" href="">Clothing</a>
-                <a class="nav-link nav-link--black" href="">Instruments</a>
-                <a class="nav-link nav-link--black" href="">Accessories</a>
-                <a class="nav-link nav-link--black" href="">Other</a>
-            </nav>
-        -->
+    <nav class="nav-bar nav-bar--center nav-bar--air-bottom">
+        <a class="nav-link nav-link--black nav-link--active" href="">All</a>
+        <a class="nav-link nav-link--black" href="">Clothing</a>
+        <a class="nav-link nav-link--black" href="">Instruments</a>
+        <a class="nav-link nav-link--black" href="">Accessories</a>
+        <a class="nav-link nav-link--black" href="">Other</a>
+    </nav>
+    -->
+
         <div class="row">
-            @foreach (var facetField in BrowseManager.Browser<MyBrowser>().FacetFields)
+            @foreach (var facetField in Model.FacetFields)
             {
-                var facet = Model.Content.FacetGroups.First(x => x.Alias == facetField.Alias.FacetFieldAlias());
+                var facetFieldAlias = facetField.CreateFacetFieldAlias(Thread.CurrentThread.CurrentUICulture.Name);
+                var facet = Model.FacetGroups.First(x => x.Alias == facetFieldAlias);
                 <div class="col-md-2 col-sm-4">
                     <div class="select-wrapper">
-                        <form action="@Model.Content.Url" method="get">
-                            <select id="@facetField.Alias.FacetFieldAlias()" onchange="this.form.submit()" name="@facetField.Alias.FacetFieldAlias()" class="facet-control">
+                        <form action="@Model.Url" method="get">
+                            <select id="@facetFieldAlias" onchange="this.form.submit()" name="@facetFieldAlias" class="facet-control">
                                 <option value="">@facetField.Label</option>
                                 @foreach (var facetValue in facet.Facets.OrderBy(x => x.Sort))
                                 {
-                                    <option selected="@(Model.Content.FacetSelection.ContainsKey(facetField.Alias.FacetFieldAlias()) && (Model.Content.FacetSelection[facetField.Alias.FacetFieldAlias()].Select(x => x.Value).Contains(facetValue.Value)))" @(facetValue.Count > 0 ? "" : "disabled") value="@facetValue.Value">@facetValue.Label (@facetValue.Count)</option>
+                                    <option selected="@(Model.FacetSelection.ContainsKey(facetFieldAlias) && (Model.FacetSelection[facetFieldAlias].Select(x => x.Value).Contains(facetValue.Value)))" @(facetValue.Count > 0 ? "" : "disabled") value="@facetValue.Value">@facetValue.Label (@facetValue.Count)</option>
                                 }
                             </select>
                         </form>
@@ -42,15 +42,16 @@
             }
         </div>
 
+
         <div class="product-grid">
-            @if (Model.Content.Results != null)
+            @if (Model.Results != null)
             {
-                foreach (Product product in Model.Content.Results)
+                foreach (Product product in Model.Results)
                 {
-                    <a href="@product.Url" class="product-grid__item" style="background-image: url('@product.Photos.FirstOrDefault().Url')">
+                    <a href="@product.Url" class="product-grid__item" style="background-image: url('@product.Photos.Url')">
                         <div class="product-grid__item__overlay">
                             <div class="product-grid__item__name">@product.ProductName</div>
-                            <div class="product-grid__item__price">@Model.Content.DefaultCurrency @product.Price.ToString("F")</div>
+                            <div class="product-grid__item__price">@Model.DefaultCurrency @product.Price.ToString("F")</div>
                         </div>
                     </a>
                 }

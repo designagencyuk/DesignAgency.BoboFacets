@@ -1,7 +1,7 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage<ContentModels.People>
-@using ContentModels = Umbraco.Web.PublishedContentModels;
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.People>
+@using ContentModels = Umbraco.Web.PublishedModels;
 @{
-    Layout = "Master.cshtml";
+    Layout = "master.cshtml";
 }
 @helper SocialLink(string content, string service)
 {
@@ -27,7 +27,7 @@
         </nav>
         -->
         <div class="employee-grid">
-            @foreach (ContentModels.Person person in Model.Content.Children)
+            @foreach (ContentModels.Person person in Model.Children)
             {
 
                 <div class="employee-grid__item">

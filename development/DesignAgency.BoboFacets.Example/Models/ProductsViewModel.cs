@@ -1,7 +1,7 @@
-﻿using DesignAgency.BoboFacets.Models;
-using System.Collections.Generic;
-using Umbraco.Core.Models;
-using Umbraco.Web.PublishedContentModels;
+﻿using System.Collections.Generic;
+using DesignAgency.BoboFacets.Models;
+using Umbraco.Core.Models.PublishedContent;
+using Umbraco.Web.PublishedModels;
 
 namespace DesignAgency.BoboFacets.Example.Models
 {
@@ -11,6 +11,8 @@ namespace DesignAgency.BoboFacets.Example.Models
         {
         }
 
+
+
         public Dictionary<string, IEnumerable<FacetSelection>> FacetSelection { get; set; }
 
         public IEnumerable<Product> Results { get; set; }
@@ -19,5 +21,6 @@ namespace DesignAgency.BoboFacets.Example.Models
         public int TotalResults { get; internal set; }
         public int TotalDocs { get; internal set; }
         public bool HasNextPage { get; internal set; }
+        public IEnumerable<IFacetField> FacetFields { get; set; }
     }
 }

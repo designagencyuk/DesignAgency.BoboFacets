@@ -1,6 +1,4 @@
-﻿using umbraco.cms.presentation;
-
-namespace DesignAgency.BoboFacets.Models
+﻿namespace DesignAgency.BoboFacets.Models
 {
     public class Facet
     {

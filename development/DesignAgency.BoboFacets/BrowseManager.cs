@@ -1,13 +1,19 @@
-﻿using DesignAgency.BoboFacets.Services;
-using System.Linq;
+﻿using System.Linq;
+using DesignAgency.BoboFacets.Browsers;
 
 namespace DesignAgency.BoboFacets
 {
-    public static class BrowseManager 
+    public class BrowseManager : IBrowseManager
     {
-        public static TBrowser Browser<TBrowser>() where TBrowser : class, IFacetBrowser
+        private readonly FacetBrowserCollection _facetBrowserCollection;
+
+        public BrowseManager(FacetBrowserCollection facetBrowserCollection)
         {
-            return BoboBrowsersResolver.Current.Browsers.OfType<TBrowser>().FirstOrDefault();
+            _facetBrowserCollection = facetBrowserCollection;
+        }
+        public TBrowser Browser<TBrowser>() where TBrowser : class, IFacetBrowser
+        {
+            return _facetBrowserCollection.OfType<TBrowser>().FirstOrDefault();
         }
     }
 }

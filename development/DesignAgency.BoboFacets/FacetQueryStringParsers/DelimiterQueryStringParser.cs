@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using DesignAgency.BoboFacets.Models;
 
 namespace DesignAgency.BoboFacets.FacetQueryStringParsers
@@ -12,9 +13,9 @@ namespace DesignAgency.BoboFacets.FacetQueryStringParsers
         {
             _delimiter = delimiter;
         }
-        public override IDictionary<IFacetField, IEnumerable<string>> ParseQueryString(List<KeyValuePair<string, string>> querystring, IEnumerable<IFacetField> facetFields)
+        public override IDictionary<IFacetField, IEnumerable<string>> ParseQueryString(NameValueCollection querystring, IEnumerable<IFacetField> facetFields, string cultureCode)
         {
-            var facetSelection = base.ParseQueryString(querystring, facetFields);
+            var facetSelection = base.ParseQueryString(querystring, facetFields, cultureCode);
             var keys = new List<IFacetField>(facetSelection.Keys);
             foreach (var facetField in keys)
             {

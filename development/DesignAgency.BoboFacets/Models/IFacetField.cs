@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using BoboBrowse.Facets;
+using BoboBrowse.Net;
+using BoboBrowse.Net.Facets;
 using Lucene.Net.Documents;
-using static BoboBrowse.Api.BrowseSelection;
-using static BoboBrowse.Api.FacetSpec;
 
 namespace DesignAgency.BoboFacets.Models
 {
@@ -19,11 +18,15 @@ namespace DesignAgency.BoboFacets.Models
         /// <summary>
         /// Indicates if the field contains multiple selection values
         /// </summary>
-        bool Multivalue { get; }
+        bool MultiValue { get; }
+        /// <summary>
+        /// Indicates if the field is dependant on the culture
+        /// </summary>
+        bool CultureDependant { get; set; }
         /// <summary>
         /// The order in which the facet options should be displayed
         /// </summary>
-        FacetSortSpec ValueOrderBy { get; }
+        FacetSpec.FacetSortSpec ValueOrderBy { get; }
         /// <summary>
         /// Set this to false when the selection operation is ValueOperationAnd in order to get the correct HitCount on the facets
         /// </summary>
@@ -35,7 +38,7 @@ namespace DesignAgency.BoboFacets.Models
         /// <summary>
         /// Sets the operation to using when selecting multiple options
         /// </summary>
-        ValueOperation SelectionOperation { get; }
+        BrowseSelection.ValueOperation SelectionOperation { get; }
         /// <summary>
         /// Takes the current field value and prepares it for index a facet option
         /// </summary>
@@ -47,14 +50,15 @@ namespace DesignAgency.BoboFacets.Models
         /// Returns the facet handler for this facet field
         /// </summary>
         /// <returns></returns>
-        FacetHandler CreateFacetHandler();
+        IFacetHandler CreateFacetHandler(string cultureCode);
 
         /// <summary>
         /// Returns the index field
         /// </summary>
         /// <param name="fieldValue"></param>
+        /// <param name="cultureCode"></param>
         /// <returns></returns>
-        Fieldable CreateIndexField(string fieldValue);
+        IFieldable CreateIndexField(string fieldValue, string cultureCode);
 
         /// <summary>
         /// Creates a readable label from the value
@@ -62,5 +66,7 @@ namespace DesignAgency.BoboFacets.Models
         /// <param name="value"></param>
         /// <returns></returns>
         string CreateValueLabel(string value);
+
+        string CreateFacetFieldAlias(string cultureCode);
     }
 }

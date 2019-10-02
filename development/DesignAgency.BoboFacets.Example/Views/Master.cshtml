@@ -1,13 +1,11 @@
-﻿@using ContentModels = Umbraco.Web.PublishedContentModels;
-@using Umbraco.Core
-@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+﻿@using Umbraco.Core.PropertyEditors
+@inherits UmbracoViewPage
 @{
     Layout = null;
-
     // Get basic design settings from the homepage
-    ContentModels.Home home = Model.Content.Site() as ContentModels.Home;
-    var colorTheme = Umbraco.GetPreValueAsString(home.ColorTheme);
-    var font = Umbraco.GetPreValueAsString(home.Font);
+    var home = (Home)Model.Root();
+    var font = home.Font;
+    var colorTheme = home.ColorTheme;
 }
 
 <!doctype html>
@@ -16,8 +14,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-    <title>@Model.Content.Name - @home.Sitename</title>
+    <title>@Model.Name - @home.Sitename</title>
     <meta name="description" content="">
     <meta name="author" content="">
 

@@ -7,7 +7,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <base href="@ViewBag.UmbracoBaseFolder/" />
+    <base href="@ViewData.GetUmbracoBaseFolder()/" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -19,11 +19,13 @@
 
     <img src="assets/img/application/logo_white.png" id="logo" />
 
-    <div class="umb-loader-container" ng-style="{'width': installer.progress}">
-        <div class="umb-loader" id="loader" ng-if="installer.loading"></div>
-    </div>
+    <umb-loader position="bottom"
+                class="umb-installer-loader"
+                ng-if="installer.loading"
+                ng-style="{'width': installer.progress}">
+    </umb-loader>
 
-    <div id="overlay"  ng-cloak ng-animate="'fade'" ng-show="installer.done"></div>
+    <div id="overlay" ng-cloak ng-animate="'fade'" ng-show="installer.done"></div>
 
     <div id="installer" class="absolute-center clearfix"
          ng-cloak
@@ -36,14 +38,16 @@
                 <p>This is most likely due to an error during application startup</p>
                 <iframe id="ysod"></iframe>
             </div>
-            <div ng-switch-default ng-include="installer.current.view"></div>    
+            <div ng-switch-default>
+                <div ng-include="installer.current.view"></div>
+            </div>    
         </div>
     </div>
 
 
     <div ng-cloak ng-animate="'fade'" id="fact" class="absolute-center clearfix" ng-show="installer.fact">
         <h2>Did you know</h2>
-        <p ng-bind-html-unsafe="installer.fact"></p>
+        <p ng-bind-html="installer.fact"></p>
     </div>
     
     <h3 ng-cloak ng-animate="'fade'" id="feedback" ng-show="installer.feedback">{{installer.feedback}}</h3> 
@@ -64,11 +68,11 @@
         var Umbraco = {};
         Umbraco.Sys = {};
         Umbraco.Sys.ServerVariables = {
-            "installApiBaseUrl": "@ViewBag.InstallApiBaseUrl",
-            "umbracoBaseUrl": "@ViewBag.UmbracoBaseFolder"
+            "installApiBaseUrl": "@ViewData.GetInstallApiBaseUrl()",
+            "umbracoBaseUrl": "@ViewData.GetUmbracoBaseFolder()"
         };
     </script>
-    <script src="lib/rgrove-lazyload/lazyload.js"></script>
+    <script src="lib/lazyload-js/lazyload.min.js"></script>
     <script src="js/install.loader.js"></script>
 </body>
 </html>

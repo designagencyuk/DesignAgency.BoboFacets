@@ -1,86 +1,99 @@
 <div>
 
-   <umb-load-indicator ng-if="page.loading"></umb-load-indicator>
+    <umb-load-indicator ng-if="page.loading"></umb-load-indicator>
 
-   <form name="contentForm"
-      ng-submit="save()"
-      novalidate
-      val-form-manager>
+    <form name="contentForm" ng-submit="save()" novalidate val-form-manager>
 
-      <umb-editor-view ng-if="!page.loading" umb-tabs>
+        <umb-editor-view ng-if="!page.loading">
 
-         <umb-editor-header
-            menu="page.menu"
-            name="content.name"
-            tabs="content.tabs"
-            hide-icon="true"
-            hide-description="true"
-            hide-alias="true">
-         </umb-editor-header>
+            <umb-variant-content-editors
+                page="page"
+                content="content"
+                culture="culture"
+                on-select-app="appChanged(app)"
+                on-select-app-anchor="appAnchorChanged(app, anchor)"
+                on-back="onBack()"
+                show-back="!(infiniteModel && infiniteModel.infiniteMode)"
+                >
+            </umb-variant-content-editors>
 
+            <umb-editor-footer>
 
-         <umb-editor-container>
+                <umb-editor-footer-content-left>
 
-            <umb-tabs-content class="form-horizontal" view="true">
-               <umb-tab id="tab{{tab.id}}" ng-repeat="tab in content.tabs" rel="{{tab.id}}">
+                    <umb-breadcrumbs
+                        ng-if="ancestors && ancestors.length > 0"
+                        ancestors="ancestors"
+                        entity-type="content">
+                    </umb-breadcrumbs>
 
-                  <umb-property ng-repeat="property in tab.properties" property="property">
-                     <umb-editor model="property"></umb-editor>
-                  </umb-property>
-
-               </umb-tab>
-            </umb-tabs-content>
-
-         </umb-editor-container>
+                </umb-editor-footer-content-left>
 
 
-         <umb-editor-footer>
+                <umb-editor-footer-content-right>
 
-            <umb-editor-footer-content-left>
+                    <umb-button
+                        ng-if="infiniteModel.infiniteMode"
+                        action="close()"
+                        button-style="link"
+                        label-key="general_close"
+                        type="button">
+                    </umb-button>
 
-               <umb-breadcrumbs
-                  ng-if="ancestors && ancestors.length > 0"
-                  ancestors="ancestors"
-                  entity-type="content">
-               </umb-breadcrumbs>
+                    <umb-button
+                        alias="preview"
+                        ng-if="!page.isNew && content.allowPreview && page.showPreviewButton"
+                        type="button"
+                        button-style="info"
+                        action="preview(content)"
+                        label-key="buttons_showPage">
+                    </umb-button>
 
-            </umb-editor-footer-content-left>
+                    <umb-button
+                        ng-if="page.showSaveButton"
+                        alias="save"
+                        type="button"
+                        button-style="{{page.saveButtonStyle}}"
+                        state="page.saveButtonState"
+                        action="save(content)"
+                        label-key="buttons_save"
+                        shortcut="ctrl+s"
+                        add-ellipsis="{{page.saveButtonEllipsis}}">
+                    </umb-button>
+                    
+                    <umb-button-group 
+                        ng-if="defaultButton && !content.trashed && !content.isElement" 
+                        button-style="success"
+                        default-button="defaultButton"
+                        sub-buttons="subButtons"
+                        state="page.buttonGroupState"
+                        direction="up"
+                        float="right">
+                    </umb-button-group>
 
+                    <umb-button
+                        ng-if="infiniteModel.infiniteMode && page.allowInfiniteSaveAndClose"
+                        action="saveAndClose(content)"
+                        button-style="primary"
+                        state="saveAndCloseButtonState"
+                        label-key="buttons_saveAndClose"
+                        type="button">
+                    </umb-button>
 
-            <umb-editor-footer-content-right>
+                    <umb-button
+                        ng-if="infiniteModel.infiniteMode && page.allowInfinitePublishAndClose"
+                        action="publishAndClose(content)"
+                        button-style="primary"
+                        state="publishAndCloseButtonState"
+                        label-key="buttons_publishAndClose"
+                        type="button">
+                    </umb-button>
 
-               <umb-button
-                  ng-if="page.listViewPath"
-                  type="link"
-                  href="#{{page.listViewPath}}"
-                  label="Return to list"
-                  label-key="buttons_returnToList">
-               </umb-button>
+                </umb-editor-footer-content-right>
 
-               <umb-button
-                  ng-if="!page.isNew && content.allowPreview"
-                  type="button"
-                  button-style="info"
-                  action="preview(content)"
-                  label="Preview page"
-                  label-key="buttons_showPage">
-               </umb-button>
+            </umb-editor-footer>
 
-               <umb-button-group
-                  ng-if="defaultButton"
-                  default-button="defaultButton"
-                  sub-buttons="subButtons"
-                  state="page.buttonGroupState"
-                  direction="up"
-                  float="right">
-               </umb-button-group>
+        </umb-editor-view>
 
-
-            </umb-editor-footer-content-right>
-
-         </umb-editor-footer>
-
-      </umb-editor-view>
-
-   </form>
+    </form>
 </div>

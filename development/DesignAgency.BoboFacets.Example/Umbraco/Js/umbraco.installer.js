@@ -1,7 +1,9 @@
 (function () {
+    'use strict';
     angular.module('umbraco.install', ['umbraco.directives']);
+    'use strict';
     angular.module('umbraco.install').controller('Umbraco.InstallerController', function ($scope, installerService) {
-        //TODO: Decouple the service from the controller - the controller should be responsible
+        // TODO: Decouple the service from the controller - the controller should be responsible
         // for the model (state) and the service should be responsible for helping the controller,
         // the controller should be passing the model into it's methods for manipulation and not hold
         // state. We should not be assigning properties from a service to a controller's scope.
@@ -32,7 +34,8 @@
     angular.module('umbraco.install').run(function ($templateCache) {
         $templateCache.removeAll();
     });
-    angular.module('umbraco.install').factory('installerService', function ($rootScope, $q, $timeout, $http, $location, $log) {
+    'use strict';
+    angular.module('umbraco.install').factory('installerService', function ($rootScope, $q, $timeout, $http, $templateRequest) {
         var _status = {
             index: 0,
             current: undefined,
@@ -48,29 +51,29 @@
         //add to umbraco installer facts here
         var facts = [
             'Umbraco helped millions of people watch a man jump from the edge of space',
-            'Over 420 000 websites are currently powered by Umbraco',
+            'Over 500 000 websites are currently powered by Umbraco',
             'At least 2 people have named their cat \'Umbraco\'',
-            'On an average day, more than 1000 people download Umbraco',
-            '<a target="_blank" href="https://umbraco.tv">umbraco.tv</a> is the premier source of Umbraco video tutorials to get you started',
-            'You can find the world\'s friendliest CMS community at <a target="_blank" href="https://our.umbraco.org">our.umbraco.org</a>',
+            'On an average day more than 1000 people download Umbraco',
+            '<a target=\'_blank\' href=\'https://umbraco.tv/\'>umbraco.tv</a> is the premier source of Umbraco video tutorials to get you started',
+            'You can find the world\'s friendliest CMS community at <a target=\'_blank\' href=\'https://our.umbraco.com/\'>our.umbraco.com</a>',
             'You can become a certified Umbraco developer by attending one of the official courses',
             'Umbraco works really well on tablets',
             'You have 100% control over your markup and design when crafting a website in Umbraco',
             'Umbraco is the best of both worlds: 100% free and open source, and backed by a professional and profitable company',
-            'There\'s a pretty big chance, you\'ve visited a website powered by Umbraco today',
+            'There\'s a pretty big chance you\'ve visited a website powered by Umbraco today',
             '\'Umbraco-spotting\' is the game of spotting big brands running Umbraco',
             'At least 4 people have the Umbraco logo tattooed on them',
-            '\'Umbraco\' is the danish name for an allen key',
+            '\'Umbraco\' is the Danish name for an allen key',
             'Umbraco has been around since 2005, that\'s a looong time in IT',
-            'More than 550 people from all over the world meet each year in Denmark in June for our annual conference <a target=\'_blank\' href=\'https://umbra.co/codegarden\'>CodeGarden</a>',
+            'More than 600 people from all over the world meet each year in Denmark in May for our annual conference <a target=\'_blank\' href=\'https://umbra.co/codegarden\'>CodeGarden</a>',
             'While you are installing Umbraco someone else on the other side of the planet is probably doing it too',
             'You can extend Umbraco without modifying the source code using either JavaScript or C#',
-            'Umbraco was installed in more than 165 countries in 2015'
+            'Umbraco has been installed in more than 198 countries'
         ];
         /**
-        Returns the description for the step at a given index based on the order of the serverOrder of steps
-        Since they don't execute on the server in the order that they are displayed in the UI.
-    */
+      Returns the description for the step at a given index based on the order of the serverOrder of steps
+      Since they don't execute on the server in the order that they are displayed in the UI.
+  */
         function getDescriptionForStepAtIndex(steps, index) {
             var sorted = _.sortBy(steps, 'serverOrder');
             if (sorted[index]) {
@@ -124,29 +127,33 @@
         var service = {
             status: _status,
             //loads the needed steps and sets the intial state
-            init: function () {
+            init: function init() {
                 service.status.loading = true;
                 if (!_status.all) {
-                    service.getSteps().then(function (response) {
-                        service.status.steps = response.data.steps;
-                        service.status.index = 0;
-                        _installerModel.installId = response.data.installId;
-                        service.findNextStep();
-                        $timeout(function () {
-                            service.status.loading = false;
-                            service.status.configuring = true;
-                        }, 2000);
+                    //pre-load the error page, if an error occurs, the page might not be able to load
+                    // so we want to make sure it's available in the templatecache first
+                    $templateRequest('views/install/error.html').then(function (x) {
+                        service.getSteps().then(function (response) {
+                            service.status.steps = response.data.steps;
+                            service.status.index = 0;
+                            _installerModel.installId = response.data.installId;
+                            service.findNextStep();
+                            $timeout(function () {
+                                service.status.loading = false;
+                                service.status.configuring = true;
+                            }, 2000);
+                        });
                     });
                 }
             },
-            //loads available packages from our.umbraco.org
-            getPackages: function () {
+            //loads available packages from our.umbraco.com
+            getPackages: function getPackages() {
                 return $http.get(Umbraco.Sys.ServerVariables.installApiBaseUrl + 'GetPackages');
             },
-            getSteps: function () {
+            getSteps: function getSteps() {
                 return $http.get(Umbraco.Sys.ServerVariables.installApiBaseUrl + 'GetSetup');
             },
-            gotoStep: function (index) {
+            gotoStep: function gotoStep(index) {
                 var step = service.status.steps[index];
                 step.view = resolveView(step.view);
                 if (!step.model) {
@@ -156,7 +163,7 @@
                 service.status.current = step;
                 service.retrieveCurrentStep();
             },
-            gotoNamedStep: function (stepName) {
+            gotoNamedStep: function gotoNamedStep(stepName) {
                 var step = _.find(service.status.steps, function (s, index) {
                     if (s.view && s.name === stepName) {
                         service.status.index = index;
@@ -172,10 +179,10 @@
                 service.status.current = step;
             },
             /** 
-            Finds the next step containing a view. If one is found it stores it as the current step 
-            and retreives the step information and returns it, otherwise returns null .
-        */
-            findNextStep: function () {
+           Finds the next step containing a view. If one is found it stores it as the current step 
+           and retreives the step information and returns it, otherwise returns null .
+       */
+            findNextStep: function findNextStep() {
                 var step = _.find(service.status.steps, function (s, index) {
                     if (s.view && index >= service.status.index) {
                         service.status.index = index;
@@ -202,16 +209,16 @@
                     return null;
                 }
             },
-            storeCurrentStep: function () {
+            storeCurrentStep: function storeCurrentStep() {
                 _installerModel.instructions[service.status.current.name] = service.status.current.model;
             },
-            retrieveCurrentStep: function () {
+            retrieveCurrentStep: function retrieveCurrentStep() {
                 if (_installerModel.instructions[service.status.current.name]) {
                     service.status.current.model = _installerModel.instructions[service.status.current.name];
                 }
             },
             /** Moves the installer forward to the next view, if there are not more views than the installation will commence */
-            forward: function () {
+            forward: function forward() {
                 service.storeCurrentStep();
                 service.status.index++;
                 var found = service.findNextStep();
@@ -220,17 +227,18 @@
                     service.install();
                 }
             },
-            backwards: function () {
+            backwards: function backwards() {
                 service.storeCurrentStep();
                 service.gotoStep(service.status.index--);
             },
-            install: function () {
+            install: function install() {
                 service.storeCurrentStep();
                 service.switchToFeedback();
                 service.status.feedback = getDescriptionForStepAtIndex(service.status.steps, 0);
                 service.status.progress = 0;
                 function processInstallStep() {
-                    $http.post(Umbraco.Sys.ServerVariables.installApiBaseUrl + 'PostPerformInstall', _installerModel).success(function (data, status, headers, config) {
+                    $http.post(Umbraco.Sys.ServerVariables.installApiBaseUrl + 'PostPerformInstall', _installerModel).then(function (response) {
+                        var data = response.data;
                         if (!data.complete) {
                             //progress feedback
                             service.status.progress = calculateProgress(service.status.steps, data.nextStep);
@@ -253,7 +261,9 @@
                         } else {
                             service.complete();
                         }
-                    }).error(function (data, status, headers, config) {
+                    }, function (response) {
+                        var data = response.data;
+                        var status = response.status;
                         //need to handle 500's separately, this will happen if something goes wrong outside
                         // of the installer (like app startup events or something) and these will get returned as text/html
                         // not as json. If this happens we can't actually load in external views since they will YSOD as well!
@@ -282,12 +292,12 @@
                 }
                 processInstallStep();
             },
-            randomFact: function () {
+            randomFact: function randomFact() {
                 safeApply($rootScope, function () {
                     service.status.fact = facts[_.random(facts.length - 1)];
                 });
             },
-            switchToFeedback: function () {
+            switchToFeedback: function switchToFeedback() {
                 service.status.current = undefined;
                 service.status.loading = true;
                 service.status.configuring = false;
@@ -298,7 +308,7 @@
                     service.randomFact();
                 }, 6000);
             },
-            switchToConfiguration: function () {
+            switchToConfiguration: function switchToConfiguration() {
                 service.status.loading = false;
                 service.status.configuring = true;
                 service.status.feedback = undefined;
@@ -307,7 +317,7 @@
                     clearInterval(factTimer);
                 }
             },
-            complete: function () {
+            complete: function complete() {
                 service.status.progress = '100%';
                 service.status.done = true;
                 service.status.feedback = 'Redirecting you to Umbraco, please wait';
@@ -322,6 +332,7 @@
         };
         return service;
     });
+    'use strict';
     angular.module('umbraco.install').controller('Umbraco.Installer.DataBaseController', function ($scope, $http, installerService) {
         $scope.checking = false;
         $scope.invalidDbDns = false;
@@ -339,10 +350,6 @@
                 id: 3
             },
             {
-                name: 'MySQL',
-                id: 2
-            },
-            {
                 name: 'Custom connection string',
                 id: -1
             }
@@ -356,7 +363,7 @@
                 $scope.invalidDbDns = false;
                 var model = installerService.status.current.model;
                 $http.post(Umbraco.Sys.ServerVariables.installApiBaseUrl + 'PostValidateDatabaseConnection', model).then(function (response) {
-                    if (response.data === 'true') {
+                    if (response.data === true) {
                         installerService.forward();
                     } else {
                         $scope.invalidDbDns = true;
@@ -369,6 +376,7 @@
             }
         };
     });
+    'use strict';
     angular.module('umbraco.install').controller('Umbraco.Installer.MachineKeyController', function ($scope, installerService) {
         $scope.continue = function () {
             installerService.status.current.model = true;
@@ -379,6 +387,7 @@
             installerService.forward();
         };
     });
+    'use strict';
     angular.module('umbraco.install').controller('Umbraco.Installer.PackagesController', function ($scope, installerService) {
         installerService.getPackages().then(function (response) {
             $scope.packages = response.data;
@@ -388,9 +397,10 @@
             installerService.forward();
         };
     });
+    'use strict';
     angular.module('umbraco.install').controller('Umbraco.Install.UserController', function ($scope, installerService) {
         $scope.passwordPattern = /.*/;
-        $scope.installer.current.model.subscribeToNewsLetter = true;
+        $scope.installer.current.model.subscribeToNewsLetter = false;
         if ($scope.installer.current.model.minNonAlphaNumericLength > 0) {
             var exp = '';
             for (var i = 0; i < $scope.installer.current.model.minNonAlphaNumericLength; i++) {

@@ -1,23 +1,25 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage<ContentModels.Home>
-@using ContentModels = Umbraco.Web.PublishedContentModels;
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.Home>
+@using ContentModels = Umbraco.Web.PublishedModels;
 @{
-    Layout = "Master.cshtml";
-    var backgroundImage = Model.Content.HeroBackgroundImage != null ? Model.Content.HeroBackgroundImage.Url : String.Empty;
+    Layout = "master.cshtml";
+    var backgroundImage = Model.HeroBackgroundImage != null ? Model.HeroBackgroundImage.Url : String.Empty;
 }
 <section class="section section--full-height background-image-full overlay overlay--dark section--content-center section--thick-border"
          style="background-image: url('@backgroundImage')">
     <div class="section__hero-content">
-        <h1>@Model.Content.HeroHeader</h1>
-        <p class="section__description">@Model.Content.HeroDescription</p>
-        <a class="button button--border--solid" href="@Model.Content.HeroCtalink.Url">
-            @Model.Content.HeroCtacaption
-        </a>
-
+        <h1>@Model.HeroHeader</h1>
+        <p class="section__description">@Model.HeroDescription</p>
+        @if (Model.HeroCtalink != null)
+        {
+            <a class="button button--border--solid" href="@Model.HeroCtalink.Url">
+                @Model.HeroCtacaption
+            </a>
+        }
     </div>
 </section>
 
 <section class="section section">
-    @Html.GetGridHtml(Model.Content, "bodyText", "bootstrap3-fluid")
+    @Html.GetGridHtml(Model, "bodyText", "bootstrap3-fluid")
 </section>
 
 
@@ -27,11 +29,11 @@
         <div class="row">
 
             <div class="ta-center">
-                <h2>@Model.Content.FooterHeader</h2>
-                <p class="section__description mw-640 ma-h-auto">@Model.Content.FooterDescription</p>
+                <h2>@Model.FooterHeader</h2>
+                <p class="section__description mw-640 ma-h-auto">@Model.FooterDescription</p>
 
-                <a class="button button--border--light_solid" href="@Model.Content.FooterCtalink.Url">
-                    @Model.Content.FooterCtacaption
+                <a class="button button--border--light_solid" href="@Model.FooterCtalink.Url">
+                    @Model.FooterCtacaption
                 </a>
 
             </div>

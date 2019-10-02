@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
-using DesignAgency.BoboFacets.Domain;
 using DesignAgency.BoboFacets.Models;
 
 namespace DesignAgency.BoboFacets.FacetQueryStringParsers
@@ -11,14 +11,14 @@ namespace DesignAgency.BoboFacets.FacetQueryStringParsers
     /// </summary>
     public class DefaultQueryStringParser : IFacetQueryStringParser
     {
-        public virtual IDictionary<IFacetField, IEnumerable<string>> ParseQueryString(List<KeyValuePair<string, string>> querystring, IEnumerable<IFacetField> facetFields)
+        public virtual IDictionary<IFacetField, IEnumerable<string>> ParseQueryString(NameValueCollection querystring, IEnumerable<IFacetField> facetFields, string cultureCode)
         {
             var facetSelection = new Dictionary<IFacetField, IEnumerable<string>>();
-            var queryStringKeys = querystring.Select(x => x.Key);
-            foreach (var facetField in facetFields.Where(x => queryStringKeys.Contains(x.Alias.FacetFieldAlias())))
+            var queryStringKeys = querystring.AllKeys;
+            foreach (var facetField in facetFields.Where(x => queryStringKeys.Contains(x.CreateFacetFieldAlias(cultureCode))))
             {
-                var facetKvps = querystring.Where(x => x.Key == facetField.Alias.FacetFieldAlias());
-                facetSelection.Add(facetField, facetKvps.Select(facetKvp => facetKvp.Value));
+                var values = querystring.GetValues(facetField.CreateFacetFieldAlias(cultureCode));
+                facetSelection.Add(facetField, values);
             }
             return facetSelection;
         }
