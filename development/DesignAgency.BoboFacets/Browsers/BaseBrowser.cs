@@ -52,12 +52,7 @@ namespace DesignAgency.BoboFacets.Browsers
                 {
                     var facetAlias = facetField.CreateFacetFieldAlias(cultureCode);
                     facetHandlers.Add(facetField.CreateFacetHandler(cultureCode));
-                    var facetSpec = new FacetSpec
-                    {
-                        OrderBy = facetField.ValueOrderBy,
-                        ExpandSelection = facetField.ExpandSelection,
-                        MinHitCount = facetField.MinHitCount
-                    };
+                    var facetSpec = facetField.CreateFacetSpec();
 
                     browseRequest.SetFacetSpec(facetAlias, facetSpec);
                 }
@@ -86,9 +81,8 @@ namespace DesignAgency.BoboFacets.Browsers
         /// </summary>
         /// <param name="browseSelection"></param>
         /// <param name="cultureCode"></param>
-        /// <param name="facetValueLabelLookupDictionary"></param>
         /// <returns></returns>
-        public virtual Dictionary<string, IEnumerable<FacetSelection>> ConvertToFacetSelection(BrowseSelection[] browseSelection, string cultureCode, IDictionary<string, IFacetLabelLookup> facetValueLabelLookupDictionary = null)
+        public virtual Dictionary<string, IEnumerable<FacetSelection>> ConvertToFacetSelection(BrowseSelection[] browseSelection, string cultureCode, IDictionary<string, Func<string, IFacetField, string>> facetValueLabelLookupDictionary = null)
         {
             var facetSelection = new Dictionary<string, IEnumerable<FacetSelection>>();
             var selections = browseSelection.ToDictionary(x => x.FieldName, x => x.Values);
@@ -103,14 +97,11 @@ namespace DesignAgency.BoboFacets.Browsers
                         var facetName = selectedValue;
 
                         var facetField = FacetFields.FirstOrDefault(x => selection.Key == x.CreateFacetFieldAlias(cultureCode));
-                        var cultureInvariantFieldAlias = facetField?.CreateFacetFieldAlias(string.Empty) ?? selection.Key;
+                        var originalAlias = facetField?.OriginalAlias ?? selection.Key;
 
-                        if (facetValueLabelLookupDictionary != null && facetValueLabelLookupDictionary.ContainsKey(cultureInvariantFieldAlias))
+                        if (facetValueLabelLookupDictionary != null && facetValueLabelLookupDictionary.ContainsKey(originalAlias))
                         {
-                            if (facetValueLabelLookupDictionary.ContainsKey(cultureInvariantFieldAlias))
-                            {
-                                facetName = facetValueLabelLookupDictionary[cultureInvariantFieldAlias].LookupLabel(selectedValue, facetField);
-                            }
+                            facetName = facetValueLabelLookupDictionary[originalAlias].Invoke(selectedValue, facetField);
                         }
                         else if (facetField != null)
                         {
@@ -136,9 +127,8 @@ namespace DesignAgency.BoboFacets.Browsers
         /// </summary>
         /// <param name="facetMap"></param>
         /// <param name="cultureCode"></param>
-        /// <param name="facetValueLabelLookupDictionary"></param>
         /// <returns></returns>
-        public virtual IEnumerable<FacetGroup> ConvertToFacetGroups(IDictionary<string, IFacetAccessible> facetMap, string cultureCode, IDictionary<string, IFacetLabelLookup> facetValueLabelLookupDictionary = null)
+        public virtual IEnumerable<FacetGroup> ConvertToFacetGroups(IDictionary<string, IFacetAccessible> facetMap, string cultureCode, IDictionary<string, Func<string, IFacetField, string>> facetValueLabelLookupDictionary = null)
         {
             var facetGroups = new List<FacetGroup>();
             if (facetMap.Any())
@@ -146,7 +136,7 @@ namespace DesignAgency.BoboFacets.Browsers
                 foreach (var map in facetMap)
                 {
                     var facetField = FacetFields.FirstOrDefault(x => map.Key == x.CreateFacetFieldAlias(cultureCode));
-                    var cultureInvariantFieldAlias = facetField?.CreateFacetFieldAlias(string.Empty) ?? map.Key;
+                    var originalAlias = facetField?.OriginalAlias ?? map.Key;
                     var group = new FacetGroup
                     {
                         Label = facetField?.Label,
@@ -157,12 +147,9 @@ namespace DesignAgency.BoboFacets.Browsers
                     {
                         var facetName = f.Value;
                         sortOrder++;
-                        if (facetValueLabelLookupDictionary != null && facetValueLabelLookupDictionary.ContainsKey(cultureInvariantFieldAlias))
+                        if (facetValueLabelLookupDictionary != null && facetValueLabelLookupDictionary.ContainsKey(originalAlias))
                         {
-                            if (facetValueLabelLookupDictionary.ContainsKey(cultureInvariantFieldAlias))
-                            {
-                                facetName = facetValueLabelLookupDictionary[cultureInvariantFieldAlias].LookupLabel(f.Value, facetField);
-                            }
+                            facetName = facetValueLabelLookupDictionary[originalAlias].Invoke(f.Value, facetField);
                         }
                         else if(facetField != null)
                         {
@@ -189,8 +176,9 @@ namespace DesignAgency.BoboFacets.Browsers
         /// Builds an optional base query to filter the results
         /// </summary>
         /// <param name="querystring"></param>
+        /// <param name="cultureCode"></param>
         /// <returns></returns>
-        public virtual Query BuildBaseQuery(NameValueCollection querystring)
+        public virtual Query BuildBaseQuery(NameValueCollection querystring, string cultureCode)
         {
             return null;
         }
@@ -199,8 +187,9 @@ namespace DesignAgency.BoboFacets.Browsers
         /// Determines the sort order of the results. Defaults to the DefaultSort
         /// </summary>
         /// <param name="querystring"></param>
+        /// <param name="cultureCode"></param>
         /// <returns></returns>
-        public virtual SortField[] DetermineSort(NameValueCollection querystring)
+        public virtual SortField[] DetermineSort(NameValueCollection querystring, string cultureCode)
         {
             return DefaultSort;
         }
@@ -216,7 +205,7 @@ namespace DesignAgency.BoboFacets.Browsers
         /// <returns></returns>
         public virtual BrowseRequest CreateBrowseRequest(NameValueCollection querystring, string cultureCode, int? page = null, bool useOffset = false, int itemsPerPage = 10)
         {
-            var query = BuildBaseQuery(querystring);
+            var query = BuildBaseQuery(querystring, cultureCode);
             
             var offset = 0;
             if (!page.HasValue)
@@ -237,7 +226,7 @@ namespace DesignAgency.BoboFacets.Browsers
                 Count = count,
                 Query = query,
                 FetchStoredFields = true,
-                Sort = DetermineSort(querystring)
+                Sort = DetermineSort(querystring, cultureCode)
             };
 
             var facetSelection = QueryStringParser.ParseQueryString(querystring, FacetFields, cultureCode);

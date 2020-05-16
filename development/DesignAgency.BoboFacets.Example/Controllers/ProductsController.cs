@@ -1,7 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Web.Mvc;
 using DesignAgency.BoboFacets.Example.Models;
+using DesignAgency.BoboFacets.Models;
 using Umbraco.Web.Models;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.PublishedModels;
@@ -24,7 +27,14 @@ namespace DesignAgency.BoboFacets.Example.Controllers
 
             var browserRequest = browser.CreateBrowseRequest(Request.QueryString, Thread.CurrentThread.CurrentUICulture.Name);
 
-            viewModel.FacetSelection = browser.ConvertToFacetSelection(browserRequest.GetSelections(), Thread.CurrentThread.CurrentUICulture.Name);
+            var facetValueLabelLookupDictionary = new Dictionary<string, Func<string, IFacetField, string>>
+            {
+                {
+                    "category", FacetValueLabelLookup
+                }
+            };
+
+            viewModel.FacetSelection = browser.ConvertToFacetSelection(browserRequest.GetSelections(), Thread.CurrentThread.CurrentUICulture.Name, facetValueLabelLookupDictionary);
 
             var results = browser.Browse(browserRequest, Thread.CurrentThread.CurrentUICulture.Name);
             
@@ -32,12 +42,17 @@ namespace DesignAgency.BoboFacets.Example.Controllers
             
             viewModel.FacetFields = browser.FacetFields;
             viewModel.Results = products;
-            viewModel.FacetGroups = browser.ConvertToFacetGroups(results.FacetMap, Thread.CurrentThread.CurrentUICulture.Name);
+            viewModel.FacetGroups = browser.ConvertToFacetGroups(results.FacetMap, Thread.CurrentThread.CurrentUICulture.Name, facetValueLabelLookupDictionary);
             viewModel.TotalResults = results.NumHits;
             viewModel.TotalDocs = results.TotalDocs;
             viewModel.HasNextPage = browserRequest.Count < results.NumHits;
 
             return CurrentTemplate(viewModel);
+        }
+
+        private string FacetValueLabelLookup(string facetValue, IFacetField field)
+        {
+            return Umbraco.GetDictionaryValue($"{field.OriginalAlias}_{facetValue}", facetValue);
         }
     }
 }

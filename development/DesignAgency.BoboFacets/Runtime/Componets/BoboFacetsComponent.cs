@@ -39,11 +39,11 @@ namespace DesignAgency.BoboFacets.Runtime.Componets
             {
                 if (facetField.CultureDependant)
                 {
-                    var cultureFields = fields.Where(x => x.Name.StartsWith(facetField.Alias));
+                    var cultureFields = fields.Where(x => x.Name.StartsWith(facetField.OriginalAlias));
                     foreach (var cultureField in cultureFields)
                     {
                         var match = Regex.Match(cultureField.Name,
-                            $"{facetField.Alias}_((?:[a-z]{{2}})(?:[-]{{1}}[a-z]{{2}})*)$");
+                            $"{facetField.OriginalAlias}_((?:[a-z]{{2}})(?:[-]{{1}}[a-z]{{2}})*)$");
                         if (match.Success)
                         {
                             AddFacetField(e, cultureField, facetField, match.Groups[1].Value);
@@ -52,7 +52,7 @@ namespace DesignAgency.BoboFacets.Runtime.Componets
                 }
                 else
                 {
-                    var field = e.Document.GetField(facetField.Alias);
+                    var field = e.Document.GetField(facetField.OriginalAlias);
                     AddFacetField(e, field, facetField, string.Empty);
                 }
             }

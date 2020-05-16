@@ -8,8 +8,8 @@ namespace DesignAgency.BoboFacets.Extensions
         public static string FacetFieldAlias(this IFacetField facetField, string cultureCode)
         {
             if (facetField.CultureDependant && !string.IsNullOrEmpty(cultureCode))
-                return Constants.Conventions.FacetFieldPrefix + facetField.Alias + "_" + cultureCode.ToLower();
-            return Constants.Conventions.FacetFieldPrefix + facetField.Alias;
+                return Constants.Conventions.FacetFieldPrefix + facetField.OriginalAlias + "_" + cultureCode.ToLower();
+            return Constants.Conventions.FacetFieldPrefix + facetField.OriginalAlias;
         }
     }
 }

@@ -8,9 +8,9 @@ namespace DesignAgency.BoboFacets.Models
     public interface IFacetField
     {
         /// <summary>
-        /// The fields current alias
+        /// The fields alias (before it's indexed by the facet handler)
         /// </summary>
-        string Alias { get; }
+        string OriginalAlias { get; }
         /// <summary>
         /// The display label for the field
         /// </summary>
@@ -24,19 +24,7 @@ namespace DesignAgency.BoboFacets.Models
         /// </summary>
         bool CultureDependant { get; set; }
         /// <summary>
-        /// The order in which the facet options should be displayed
-        /// </summary>
-        FacetSpec.FacetSortSpec ValueOrderBy { get; }
-        /// <summary>
-        /// Set this to false when the selection operation is ValueOperationAnd in order to get the correct HitCount on the facets
-        /// </summary>
-        bool ExpandSelection { get; }
-        /// <summary>
-        /// Sets the min hit count for the field to be returned as a valid facet
-        /// </summary>
-        int MinHitCount { get; }
-        /// <summary>
-        /// Sets the operation to using when selecting multiple options
+        /// Sets the operation to use when selecting multiple field values
         /// </summary>
         BrowseSelection.ValueOperation SelectionOperation { get; }
         /// <summary>
@@ -51,6 +39,12 @@ namespace DesignAgency.BoboFacets.Models
         /// </summary>
         /// <returns></returns>
         IFacetHandler CreateFacetHandler(string cultureCode);
+
+        /// <summary>
+        /// Returns the facet spec for this field
+        /// </summary>
+        /// <returns></returns>
+        FacetSpec CreateFacetSpec();
 
         /// <summary>
         /// Returns the index field

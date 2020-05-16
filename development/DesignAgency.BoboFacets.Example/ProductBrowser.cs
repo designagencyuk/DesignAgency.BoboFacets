@@ -23,7 +23,7 @@ namespace DesignAgency.BoboFacets.Example
         public override string IndexProvider => "ExternalIndex";
         public override SortField[] DefaultSort => new[] { new SortField("sortOrder", SortField.INT, false) };
 
-        public override Query BuildBaseQuery(NameValueCollection querystring)
+        public override Query BuildBaseQuery(NameValueCollection querystring, string cultureCode)
         {
             if(!ExamineManager.TryGetIndex(IndexProvider, out var index))
             {
@@ -32,6 +32,9 @@ namespace DesignAgency.BoboFacets.Example
 
             var query = (LuceneSearchQuery) index.GetSearcher().CreateQuery();
             query.NodeTypeAlias(Product.ModelTypeAlias);
+            query.Group(group => group.Field(UmbracoContentIndex.VariesByCultureFieldName, "y").And()
+                    .Field($"{UmbracoExamineIndex.PublishedFieldName}_{cultureCode.ToLower()}", "y")).Or()
+                .Field(UmbracoContentIndex.VariesByCultureFieldName, "n");
             return query.Query;
         }
     }
