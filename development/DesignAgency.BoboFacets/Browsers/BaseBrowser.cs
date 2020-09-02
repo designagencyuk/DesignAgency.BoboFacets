@@ -81,6 +81,7 @@ namespace DesignAgency.BoboFacets.Browsers
         /// </summary>
         /// <param name="browseSelection"></param>
         /// <param name="cultureCode"></param>
+        /// <param name="facetValueLabelLookupDictionary"></param>
         /// <returns></returns>
         public virtual Dictionary<string, IEnumerable<FacetSelection>> ConvertToFacetSelection(BrowseSelection[] browseSelection, string cultureCode, IDictionary<string, Func<string, IFacetField, string>> facetValueLabelLookupDictionary = null)
         {
@@ -127,6 +128,7 @@ namespace DesignAgency.BoboFacets.Browsers
         /// </summary>
         /// <param name="facetMap"></param>
         /// <param name="cultureCode"></param>
+        /// <param name="facetValueLabelLookupDictionary"></param>
         /// <returns></returns>
         public virtual IEnumerable<FacetGroup> ConvertToFacetGroups(IDictionary<string, IFacetAccessible> facetMap, string cultureCode, IDictionary<string, Func<string, IFacetField, string>> facetValueLabelLookupDictionary = null)
         {

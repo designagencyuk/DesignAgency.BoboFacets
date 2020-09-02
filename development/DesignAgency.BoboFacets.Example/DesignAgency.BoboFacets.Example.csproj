@@ -484,13 +484,13 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.2.6.1\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DesignAgency.BoboFacets\DesignAgency.BoboFacets.csproj">
-      <Project>{677b28d3-7100-419b-ab7e-5740481579dd}</Project>
-      <Name>DesignAgency.BoboFacets</Name>
-    </ProjectReference>
+    <Folder Include="Runtime\Componets\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Runtime\Componets\" />
+    <ProjectReference Include="..\DesignAgency.BoboFacets\DesignAgency.BoboFacets.csproj">
+      <Project>{a647efe7-e06a-46ab-beb3-e37fa6f57113}</Project>
+      <Name>DesignAgency.BoboFacets</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
