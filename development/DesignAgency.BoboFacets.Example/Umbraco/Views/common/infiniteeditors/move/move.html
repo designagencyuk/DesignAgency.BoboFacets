@@ -13,9 +13,6 @@
     <umb-editor-container>
       <umb-box>
         <umb-box-content>
-          <p class="abstract" ng-hide="success">
-            <localize key="actions_infiniteEditorChooseWhereToMove">Choose where to move the selected item(s)</localize>
-          </p>
 
           <div ng-hide="miniListView">
             <div class="umb-control-group">
@@ -78,8 +75,7 @@
                 button-style="success"
                 label-key="general_submit"
                 state="vm.saveButtonState"
-                action="vm.submit(model)"
-                disabled="!model.target">
+                action="vm.submit(model)">
             </umb-button>
         </umb-editor-footer-content-right>
     </umb-editor-footer>

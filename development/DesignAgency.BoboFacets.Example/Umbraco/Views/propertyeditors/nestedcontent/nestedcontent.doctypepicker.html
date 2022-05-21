@@ -24,7 +24,12 @@
                     <td>
                         {{ph = placeholder(config);""}}
                         <div class="umb-nested-content__placeholder" ng-class="{'umb-nested-content__placeholder--selected':ph}" ng-click="openElemTypeModal($event, config)">
-                            <umb-node-preview ng-if="ph" icon="ph.icon" name="ph.name"></umb-node-preview>
+                            <span class="umb-nested-content__placeholder-icon-holder" ng-if="ph">
+                                <i class="umb-nested-content__placeholder-icon {{ ph.icon }}"></i>
+                            </span>
+                            <span class="umb-nested-content__placeholder-name" ng-if="ph">
+                                {{ ph.name }}
+                            </span>
                             <localize key="content_nestedContentAddElementType" ng-if="!ph">Add element type</localize>
                         </div>
 
@@ -56,13 +61,11 @@
     <div class="umb-nested-content__help-text" ng-show="showHelpText">
         <p>
             <b><localize key="general_group">Group</localize>:</b><br />
-            <localize key="content_nestedContentGroupHelpText">Select the group whose properties should be displayed. If left blank, the first group on the element type will be used.</localize>
+            Select the group whose properties should be displayed. If left blank, the first group on the element type will be used.
         </p>
         <p>
             <b><localize key="template_template">Template</localize>:</b><br />
-            <localize key="content_nestedContentTemplateHelpTextPart1">Enter an angular expression to evaluate against each item for its name. Use</localize>
-            <code ng-non-bindable>{{$index}}</code>
-            <localize key="content_nestedContentTemplateHelpTextPart2">to display the item index</localize>
+            Enter an angular expression to evaluate against each item for its name. Use <code ng-non-bindable>{{$index}}</code> to display the item index
         </p>
     </div>
 </div>

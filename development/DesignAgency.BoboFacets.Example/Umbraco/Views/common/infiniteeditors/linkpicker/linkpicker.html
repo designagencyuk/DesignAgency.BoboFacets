@@ -1,4 +1,4 @@
-<div ng-controller="Umbraco.Editors.LinkPickerController as vm" class="umb-linkpicker">
+<div ng-controller="Umbraco.Editors.LinkPickerController as vm">
 
     <umb-editor-view>
 
@@ -14,9 +14,9 @@
             <umb-box>
                 <umb-box-content>
 
-                    <div ng-class="{'flex': showAnchor}">
+                    <div class="flex">
 
-                        <umb-control-group label="@defaultdialogs_urlLinkPicker" class="umb-linkpicker__url">
+                        <umb-control-group label="@defaultdialogs_urlLinkPicker">
                             <input type="text"
                                     style="margin-right: 10px;"
                                     localize="placeholder"
@@ -27,7 +27,7 @@
                                     ng-disabled="model.target.id || model.target.udi" />
                         </umb-control-group>
 
-                        <umb-control-group label="@defaultdialogs_anchorLinkPicker" class="umb-linkpicker__anchor" ng-if="showAnchor">
+                        <umb-control-group label="@defaultdialogs_anchorLinkPicker">
                             <input type="text"
                                     list="anchors"
                                     localize="placeholder"

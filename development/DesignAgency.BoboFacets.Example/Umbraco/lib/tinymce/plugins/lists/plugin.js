@@ -1,5 +1,5 @@
 (function () {
-var lists = (function (domGlobals) {
+var lists = (function () {
     'use strict';
 
     var global = tinymce.util.Tools.resolve('tinymce.PluginManager');
@@ -204,13 +204,25 @@ var lists = (function (domGlobals) {
       resolveBookmark: resolveBookmark
     };
 
-    var noop = function () {
-    };
     var constant = function (value) {
       return function () {
         return value;
       };
     };
+    function curry(fn) {
+      var initialArgs = [];
+      for (var _i = 1; _i < arguments.length; _i++) {
+        initialArgs[_i - 1] = arguments[_i];
+      }
+      return function () {
+        var restArgs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+          restArgs[_i] = arguments[_i];
+        }
+        var all = initialArgs.concat(restArgs);
+        return fn.apply(null, all);
+      };
+    }
     var not = function (f) {
       return function () {
         var args = [];
@@ -223,6 +235,8 @@ var lists = (function (domGlobals) {
     var never = constant(false);
     var always = constant(true);
 
+    var never$1 = never;
+    var always$1 = always;
     var none = function () {
       return NONE;
     };
@@ -230,33 +244,43 @@ var lists = (function (domGlobals) {
       var eq = function (o) {
         return o.isNone();
       };
-      var call = function (thunk) {
+      var call$$1 = function (thunk) {
         return thunk();
       };
       var id = function (n) {
         return n;
       };
+      var noop$$1 = function () {
+      };
+      var nul = function () {
+        return null;
+      };
+      var undef = function () {
+        return undefined;
+      };
       var me = {
         fold: function (n, s) {
           return n();
         },
-        is: never,
-        isSome: never,
-        isNone: always,
+        is: never$1,
+        isSome: never$1,
+        isNone: always$1,
         getOr: id,
-        getOrThunk: call,
+        getOrThunk: call$$1,
         getOrDie: function (msg) {
           throw new Error(msg || 'error: getOrDie called on none.');
         },
-        getOrNull: constant(null),
-        getOrUndefined: constant(undefined),
+        getOrNull: nul,
+        getOrUndefined: undef,
         or: id,
-        orThunk: call,
+        orThunk: call$$1,
         map: none,
-        each: noop,
+        ap: none,
+        each: noop$$1,
         bind: none,
-        exists: never,
-        forall: always,
+        flatten: none,
+        exists: never$1,
+        forall: always$1,
         filter: none,
         equals: eq,
         equals_: eq,
@@ -265,15 +289,19 @@ var lists = (function (domGlobals) {
         },
         toString: constant('none()')
       };
-      if (Object.freeze) {
+      if (Object.freeze)
         Object.freeze(me);
-      }
       return me;
     }();
     var some = function (a) {
-      var constant_a = constant(a);
+      var constant_a = function () {
+        return a;
+      };
       var self = function () {
         return me;
+      };
+      var map = function (f) {
+        return some(f(a));
       };
       var bind = function (f) {
         return f(a);
@@ -285,8 +313,8 @@ var lists = (function (domGlobals) {
         is: function (v) {
           return a === v;
         },
-        isSome: always,
-        isNone: never,
+        isSome: always$1,
+        isNone: never$1,
         getOr: constant_a,
         getOrThunk: constant_a,
         getOrDie: constant_a,
@@ -294,31 +322,35 @@ var lists = (function (domGlobals) {
         getOrUndefined: constant_a,
         or: self,
         orThunk: self,
-        map: function (f) {
-          return some(f(a));
+        map: map,
+        ap: function (optfab) {
+          return optfab.fold(none, function (fab) {
+            return some(fab(a));
+          });
         },
         each: function (f) {
           f(a);
         },
         bind: bind,
+        flatten: constant_a,
         exists: bind,
         forall: bind,
         filter: function (f) {
           return f(a) ? me : NONE;
+        },
+        equals: function (o) {
+          return o.is(a);
+        },
+        equals_: function (o, elementEq) {
+          return o.fold(never$1, function (b) {
+            return elementEq(a, b);
+          });
         },
         toArray: function () {
           return [a];
         },
         toString: function () {
           return 'some(' + a + ')';
-        },
-        equals: function (o) {
-          return o.is(a);
-        },
-        equals_: function (o, elementEq) {
-          return o.fold(never, function (b) {
-            return elementEq(a, b);
-          });
         }
       };
       return me;
@@ -333,16 +365,13 @@ var lists = (function (domGlobals) {
     };
 
     var typeOf = function (x) {
-      if (x === null) {
+      if (x === null)
         return 'null';
-      }
       var t = typeof x;
-      if (t === 'object' && (Array.prototype.isPrototypeOf(x) || x.constructor && x.constructor.name === 'Array')) {
+      if (t === 'object' && Array.prototype.isPrototypeOf(x))
         return 'array';
-      }
-      if (t === 'object' && (String.prototype.isPrototypeOf(x) || x.constructor && x.constructor.name === 'String')) {
+      if (t === 'object' && String.prototype.isPrototypeOf(x))
         return 'string';
-      }
       return t;
     };
     var isType = function (type) {
@@ -351,33 +380,30 @@ var lists = (function (domGlobals) {
       };
     };
     var isString = isType('string');
-    var isArray = isType('array');
     var isBoolean = isType('boolean');
     var isFunction = isType('function');
     var isNumber = isType('number');
 
-    var nativeSlice = Array.prototype.slice;
-    var nativePush = Array.prototype.push;
     var map = function (xs, f) {
       var len = xs.length;
       var r = new Array(len);
       for (var i = 0; i < len; i++) {
         var x = xs[i];
-        r[i] = f(x, i);
+        r[i] = f(x, i, xs);
       }
       return r;
     };
     var each = function (xs, f) {
       for (var i = 0, len = xs.length; i < len; i++) {
         var x = xs[i];
-        f(x, i);
+        f(x, i, xs);
       }
     };
     var filter = function (xs, pred) {
       var r = [];
       for (var i = 0, len = xs.length; i < len; i++) {
         var x = xs[i];
-        if (pred(x, i)) {
+        if (pred(x, i, xs)) {
           r.push(x);
         }
       }
@@ -415,19 +441,19 @@ var lists = (function (domGlobals) {
     var find = function (xs, pred) {
       for (var i = 0, len = xs.length; i < len; i++) {
         var x = xs[i];
-        if (pred(x, i)) {
+        if (pred(x, i, xs)) {
           return Option.some(x);
         }
       }
       return Option.none();
     };
+    var push = Array.prototype.push;
     var flatten = function (xs) {
       var r = [];
       for (var i = 0, len = xs.length; i < len; ++i) {
-        if (!isArray(xs[i])) {
+        if (!Array.prototype.isPrototypeOf(xs[i]))
           throw new Error('Arr.flatten item ' + i + ' was not an array, input: ' + xs);
-        }
-        nativePush.apply(r, xs[i]);
+        push.apply(r, xs[i]);
       }
       return r;
     };
@@ -435,8 +461,9 @@ var lists = (function (domGlobals) {
       var output = map(xs, f);
       return flatten(output);
     };
+    var slice = Array.prototype.slice;
     var reverse = function (xs) {
-      var r = nativeSlice.call(xs, 0);
+      var r = slice.call(xs, 0);
       r.reverse();
       return r;
     };
@@ -447,16 +474,15 @@ var lists = (function (domGlobals) {
       return xs.length === 0 ? Option.none() : Option.some(xs[xs.length - 1]);
     };
     var from$1 = isFunction(Array.from) ? Array.from : function (x) {
-      return nativeSlice.call(x);
+      return slice.call(x);
     };
 
-    var Global = typeof domGlobals.window !== 'undefined' ? domGlobals.window : Function('return this;')();
+    var Global = typeof window !== 'undefined' ? window : Function('return this;')();
 
     var path = function (parts, scope) {
       var o = scope !== undefined && scope !== null ? scope : Global;
-      for (var i = 0; i < parts.length && o !== undefined && o !== null; ++i) {
+      for (var i = 0; i < parts.length && o !== undefined && o !== null; ++i)
         o = o[parts[i]];
-      }
       return o;
     };
     var resolve = function (p, scope) {
@@ -469,9 +495,8 @@ var lists = (function (domGlobals) {
     };
     var getOrDie = function (name, scope) {
       var actual = unsafe(name, scope);
-      if (actual === undefined || actual === null) {
-        throw new Error(name + ' not available on this browser');
-      }
+      if (actual === undefined || actual === null)
+        throw name + ' not available on this browser';
       return actual;
     };
     var Global$1 = { getOrDie: getOrDie };
@@ -564,88 +589,6 @@ var lists = (function (domGlobals) {
       getSelectedListRoots: getSelectedListRoots
     };
 
-    var fromHtml = function (html, scope) {
-      var doc = scope || domGlobals.document;
-      var div = doc.createElement('div');
-      div.innerHTML = html;
-      if (!div.hasChildNodes() || div.childNodes.length > 1) {
-        domGlobals.console.error('HTML does not have a single root node', html);
-        throw new Error('HTML must have a single root node');
-      }
-      return fromDom(div.childNodes[0]);
-    };
-    var fromTag = function (tag, scope) {
-      var doc = scope || domGlobals.document;
-      var node = doc.createElement(tag);
-      return fromDom(node);
-    };
-    var fromText = function (text, scope) {
-      var doc = scope || domGlobals.document;
-      var node = doc.createTextNode(text);
-      return fromDom(node);
-    };
-    var fromDom = function (node) {
-      if (node === null || node === undefined) {
-        throw new Error('Node cannot be null or undefined');
-      }
-      return { dom: constant(node) };
-    };
-    var fromPoint = function (docElm, x, y) {
-      var doc = docElm.dom();
-      return Option.from(doc.elementFromPoint(x, y)).map(fromDom);
-    };
-    var Element = {
-      fromHtml: fromHtml,
-      fromTag: fromTag,
-      fromText: fromText,
-      fromDom: fromDom,
-      fromPoint: fromPoint
-    };
-
-    var lift2 = function (oa, ob, f) {
-      return oa.isSome() && ob.isSome() ? Option.some(f(oa.getOrDie(), ob.getOrDie())) : Option.none();
-    };
-
-    var fromElements = function (elements, scope) {
-      var doc = scope || domGlobals.document;
-      var fragment = doc.createDocumentFragment();
-      each(elements, function (element) {
-        fragment.appendChild(element.dom());
-      });
-      return Element.fromDom(fragment);
-    };
-
-    var Immutable = function () {
-      var fields = [];
-      for (var _i = 0; _i < arguments.length; _i++) {
-        fields[_i] = arguments[_i];
-      }
-      return function () {
-        var values = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          values[_i] = arguments[_i];
-        }
-        if (fields.length !== values.length) {
-          throw new Error('Wrong number of arguments to struct. Expected "[' + fields.length + ']", got ' + values.length + ' arguments');
-        }
-        var struct = {};
-        each(fields, function (name, i) {
-          struct[name] = constant(values[i]);
-        });
-        return struct;
-      };
-    };
-
-    var keys = Object.keys;
-    var each$1 = function (obj, f) {
-      var props = keys(obj);
-      for (var k = 0, len = props.length; k < len; k++) {
-        var i = props[k];
-        var x = obj[i];
-        f(x, i);
-      }
-    };
-
     var node = function () {
       var f = Global$1.getOrDie('Node');
       return f;
@@ -659,7 +602,7 @@ var lists = (function (domGlobals) {
     var documentPositionContainedBy = function (a, b) {
       return compareDocumentPosition(a, b, node().DOCUMENT_POSITION_CONTAINED_BY);
     };
-    var Node = {
+    var Node$1 = {
       documentPositionPreceding: documentPositionPreceding,
       documentPositionContainedBy: documentPositionContainedBy
     };
@@ -683,20 +626,18 @@ var lists = (function (domGlobals) {
     var firstMatch = function (regexes, s) {
       for (var i = 0; i < regexes.length; i++) {
         var x = regexes[i];
-        if (x.test(s)) {
+        if (x.test(s))
           return x;
-        }
       }
       return undefined;
     };
     var find$1 = function (regexes, agent) {
       var r = firstMatch(regexes, agent);
-      if (!r) {
+      if (!r)
         return {
           major: 0,
           minor: 0
         };
-      }
       var group = function (i) {
         return Number(agent.replace(r, '$' + i));
       };
@@ -704,9 +645,8 @@ var lists = (function (domGlobals) {
     };
     var detect = function (versionRegexes, agent) {
       var cleanedAgent = String(agent).toLowerCase();
-      if (versionRegexes.length === 0) {
+      if (versionRegexes.length === 0)
         return unknown();
-      }
       return find$1(versionRegexes, cleanedAgent);
     };
     var unknown = function () {
@@ -861,14 +801,14 @@ var lists = (function (domGlobals) {
       detectOs: detectOs
     };
 
-    var contains = function (str, substr) {
+    var contains$1 = function (str, substr) {
       return str.indexOf(substr) !== -1;
     };
 
     var normalVersionRegex = /.*?version\/\ ?([0-9]+)\.([0-9]+).*/;
     var checkContains = function (target) {
       return function (uastring) {
-        return contains(uastring, target);
+        return contains$1(uastring, target);
       };
     };
     var browsers = [
@@ -876,7 +816,8 @@ var lists = (function (domGlobals) {
         name: 'Edge',
         versionRegexes: [/.*?edge\/ ?([0-9]+)\.([0-9]+)$/],
         search: function (uastring) {
-          return contains(uastring, 'edge/') && contains(uastring, 'chrome') && contains(uastring, 'safari') && contains(uastring, 'applewebkit');
+          var monstrosity = contains$1(uastring, 'edge/') && contains$1(uastring, 'chrome') && contains$1(uastring, 'safari') && contains$1(uastring, 'applewebkit');
+          return monstrosity;
         }
       },
       {
@@ -886,7 +827,7 @@ var lists = (function (domGlobals) {
           normalVersionRegex
         ],
         search: function (uastring) {
-          return contains(uastring, 'chrome') && !contains(uastring, 'chromeframe');
+          return contains$1(uastring, 'chrome') && !contains$1(uastring, 'chromeframe');
         }
       },
       {
@@ -896,7 +837,7 @@ var lists = (function (domGlobals) {
           /.*?rv:([0-9]+)\.([0-9]+).*/
         ],
         search: function (uastring) {
-          return contains(uastring, 'msie') || contains(uastring, 'trident');
+          return contains$1(uastring, 'msie') || contains$1(uastring, 'trident');
         }
       },
       {
@@ -919,7 +860,7 @@ var lists = (function (domGlobals) {
           /.*?cpu os ([0-9]+)_([0-9]+).*/
         ],
         search: function (uastring) {
-          return (contains(uastring, 'safari') || contains(uastring, 'mobile/')) && contains(uastring, 'applewebkit');
+          return (contains$1(uastring, 'safari') || contains$1(uastring, 'mobile/')) && contains$1(uastring, 'applewebkit');
         }
       }
     ];
@@ -932,7 +873,7 @@ var lists = (function (domGlobals) {
       {
         name: 'iOS',
         search: function (uastring) {
-          return contains(uastring, 'iphone') || contains(uastring, 'ipad');
+          return contains$1(uastring, 'iphone') || contains$1(uastring, 'ipad');
         },
         versionRegexes: [
           /.*?version\/\ ?([0-9]+)\.([0-9]+).*/,
@@ -986,103 +927,99 @@ var lists = (function (domGlobals) {
     var PlatformDetection = { detect: detect$2 };
 
     var detect$3 = cached(function () {
-      var userAgent = domGlobals.navigator.userAgent;
+      var userAgent = navigator.userAgent;
       return PlatformDetection.detect(userAgent);
     });
     var PlatformDetection$1 = { detect: detect$3 };
 
-    var ATTRIBUTE = domGlobals.Node.ATTRIBUTE_NODE;
-    var CDATA_SECTION = domGlobals.Node.CDATA_SECTION_NODE;
-    var COMMENT = domGlobals.Node.COMMENT_NODE;
-    var DOCUMENT = domGlobals.Node.DOCUMENT_NODE;
-    var DOCUMENT_TYPE = domGlobals.Node.DOCUMENT_TYPE_NODE;
-    var DOCUMENT_FRAGMENT = domGlobals.Node.DOCUMENT_FRAGMENT_NODE;
-    var ELEMENT = domGlobals.Node.ELEMENT_NODE;
-    var TEXT = domGlobals.Node.TEXT_NODE;
-    var PROCESSING_INSTRUCTION = domGlobals.Node.PROCESSING_INSTRUCTION_NODE;
-    var ENTITY_REFERENCE = domGlobals.Node.ENTITY_REFERENCE_NODE;
-    var ENTITY = domGlobals.Node.ENTITY_NODE;
-    var NOTATION = domGlobals.Node.NOTATION_NODE;
+    var fromHtml = function (html, scope) {
+      var doc = scope || document;
+      var div = doc.createElement('div');
+      div.innerHTML = html;
+      if (!div.hasChildNodes() || div.childNodes.length > 1) {
+        console.error('HTML does not have a single root node', html);
+        throw 'HTML must have a single root node';
+      }
+      return fromDom(div.childNodes[0]);
+    };
+    var fromTag = function (tag, scope) {
+      var doc = scope || document;
+      var node = doc.createElement(tag);
+      return fromDom(node);
+    };
+    var fromText = function (text, scope) {
+      var doc = scope || document;
+      var node = doc.createTextNode(text);
+      return fromDom(node);
+    };
+    var fromDom = function (node) {
+      if (node === null || node === undefined)
+        throw new Error('Node cannot be null or undefined');
+      return { dom: constant(node) };
+    };
+    var fromPoint = function (docElm, x, y) {
+      var doc = docElm.dom();
+      return Option.from(doc.elementFromPoint(x, y)).map(fromDom);
+    };
+    var Element$$1 = {
+      fromHtml: fromHtml,
+      fromTag: fromTag,
+      fromText: fromText,
+      fromDom: fromDom,
+      fromPoint: fromPoint
+    };
+
+    var ATTRIBUTE = Node.ATTRIBUTE_NODE;
+    var CDATA_SECTION = Node.CDATA_SECTION_NODE;
+    var COMMENT = Node.COMMENT_NODE;
+    var DOCUMENT = Node.DOCUMENT_NODE;
+    var DOCUMENT_TYPE = Node.DOCUMENT_TYPE_NODE;
+    var DOCUMENT_FRAGMENT = Node.DOCUMENT_FRAGMENT_NODE;
+    var ELEMENT = Node.ELEMENT_NODE;
+    var TEXT = Node.TEXT_NODE;
+    var PROCESSING_INSTRUCTION = Node.PROCESSING_INSTRUCTION_NODE;
+    var ENTITY_REFERENCE = Node.ENTITY_REFERENCE_NODE;
+    var ENTITY = Node.ENTITY_NODE;
+    var NOTATION = Node.NOTATION_NODE;
 
     var ELEMENT$1 = ELEMENT;
     var is = function (element, selector) {
-      var dom = element.dom();
-      if (dom.nodeType !== ELEMENT$1) {
+      var elem = element.dom();
+      if (elem.nodeType !== ELEMENT$1)
         return false;
-      } else {
-        var elem = dom;
-        if (elem.matches !== undefined) {
-          return elem.matches(selector);
-        } else if (elem.msMatchesSelector !== undefined) {
-          return elem.msMatchesSelector(selector);
-        } else if (elem.webkitMatchesSelector !== undefined) {
-          return elem.webkitMatchesSelector(selector);
-        } else if (elem.mozMatchesSelector !== undefined) {
-          return elem.mozMatchesSelector(selector);
-        } else {
-          throw new Error('Browser lacks native selectors');
-        }
-      }
+      else if (elem.matches !== undefined)
+        return elem.matches(selector);
+      else if (elem.msMatchesSelector !== undefined)
+        return elem.msMatchesSelector(selector);
+      else if (elem.webkitMatchesSelector !== undefined)
+        return elem.webkitMatchesSelector(selector);
+      else if (elem.mozMatchesSelector !== undefined)
+        return elem.mozMatchesSelector(selector);
+      else
+        throw new Error('Browser lacks native selectors');
     };
 
     var eq = function (e1, e2) {
       return e1.dom() === e2.dom();
     };
     var regularContains = function (e1, e2) {
-      var d1 = e1.dom();
-      var d2 = e2.dom();
+      var d1 = e1.dom(), d2 = e2.dom();
       return d1 === d2 ? false : d1.contains(d2);
     };
     var ieContains = function (e1, e2) {
-      return Node.documentPositionContainedBy(e1.dom(), e2.dom());
+      return Node$1.documentPositionContainedBy(e1.dom(), e2.dom());
     };
     var browser = PlatformDetection$1.detect().browser;
-    var contains$1 = browser.isIE() ? ieContains : regularContains;
+    var contains$2 = browser.isIE() ? ieContains : regularContains;
     var is$1 = is;
 
-    var parent = function (element) {
-      return Option.from(element.dom().parentNode).map(Element.fromDom);
-    };
-    var children = function (element) {
-      return map(element.dom().childNodes, Element.fromDom);
-    };
-    var child = function (element, index) {
-      var cs = element.dom().childNodes;
-      return Option.from(cs[index]).map(Element.fromDom);
-    };
-    var firstChild = function (element) {
-      return child(element, 0);
-    };
-    var lastChild = function (element) {
-      return child(element, element.dom().childNodes.length - 1);
-    };
-    var spot = Immutable('element', 'offset');
-
-    var before = function (marker, element) {
-      var parent$1 = parent(marker);
-      parent$1.each(function (v) {
-        v.dom().insertBefore(element.dom(), marker.dom());
-      });
-    };
-    var append = function (parent, element) {
-      parent.dom().appendChild(element.dom());
-    };
-
-    var before$1 = function (marker, elements) {
-      each(elements, function (x) {
-        before(marker, x);
-      });
-    };
-    var append$1 = function (parent, elements) {
-      each(elements, function (x) {
-        append(parent, x);
-      });
-    };
-
-    var remove = function (element) {
-      var dom = element.dom();
-      if (dom.parentNode !== null) {
-        dom.parentNode.removeChild(dom);
+    var keys = Object.keys;
+    var each$1 = function (obj, f) {
+      var props = keys(obj);
+      for (var k = 0, len = props.length; k < len; k++) {
+        var i = props[k];
+        var x = obj[i];
+        f(x, i, obj);
       }
     };
 
@@ -1090,21 +1027,12 @@ var lists = (function (domGlobals) {
       var r = element.dom().nodeName;
       return r.toLowerCase();
     };
-    var type = function (element) {
-      return element.dom().nodeType;
-    };
-    var isType$1 = function (t) {
-      return function (element) {
-        return type(element) === t;
-      };
-    };
-    var isElement = isType$1(ELEMENT);
 
-    var rawSet = function (dom, key, value) {
-      if (isString(value) || isBoolean(value) || isNumber(value)) {
-        dom.setAttribute(key, value + '');
+    var rawSet = function (dom, key, value$$1) {
+      if (isString(value$$1) || isBoolean(value$$1) || isNumber(value$$1)) {
+        dom.setAttribute(key, value$$1 + '');
       } else {
-        domGlobals.console.error('Invalid call to Attr.set. Key ', key, ':: Value ', value, ':: Element ', dom);
+        console.error('Invalid call to Attr.set. Key ', key, ':: Value ', value$$1, ':: Element ', dom);
         throw new Error('Attribute value was not simple');
       }
     };
@@ -1121,32 +1049,82 @@ var lists = (function (domGlobals) {
       }, {});
     };
 
-    var isSupported = function (dom) {
-      return dom.style !== undefined && isFunction(dom.style.getPropertyValue);
+    var Immutable = function () {
+      var fields = [];
+      for (var _i = 0; _i < arguments.length; _i++) {
+        fields[_i] = arguments[_i];
+      }
+      return function () {
+        var values = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+          values[_i] = arguments[_i];
+        }
+        if (fields.length !== values.length) {
+          throw new Error('Wrong number of arguments to struct. Expected "[' + fields.length + ']", got ' + values.length + ' arguments');
+        }
+        var struct = {};
+        each(fields, function (name, i) {
+          struct[name] = constant(values[i]);
+        });
+        return struct;
+      };
     };
 
-    var internalSet = function (dom, property, value) {
-      if (!isString(value)) {
-        domGlobals.console.error('Invalid call to CSS.set. Property ', property, ':: Value ', value, ':: Element ', dom);
-        throw new Error('CSS value must be a string: ' + value);
-      }
-      if (isSupported(dom)) {
-        dom.style.setProperty(property, value);
-      }
-    };
-    var set = function (element, property, value) {
+    var parent = function (element) {
       var dom = element.dom();
-      internalSet(dom, property, value);
+      return Option.from(dom.parentNode).map(Element$$1.fromDom);
+    };
+    var children = function (element) {
+      var dom = element.dom();
+      return map(dom.childNodes, Element$$1.fromDom);
+    };
+    var child = function (element, index) {
+      var children = element.dom().childNodes;
+      return Option.from(children[index]).map(Element$$1.fromDom);
+    };
+    var firstChild = function (element) {
+      return child(element, 0);
+    };
+    var lastChild = function (element) {
+      return child(element, element.dom().childNodes.length - 1);
+    };
+    var spot = Immutable('element', 'offset');
+
+    var before = function (marker, element) {
+      var parent$$1 = parent(marker);
+      parent$$1.each(function (v) {
+        v.dom().insertBefore(element.dom(), marker.dom());
+      });
+    };
+    var append = function (parent$$1, element) {
+      parent$$1.dom().appendChild(element.dom());
     };
 
-    var clone$1 = function (original, isDeep) {
-      return Element.fromDom(original.dom().cloneNode(isDeep));
+    var before$1 = function (marker, elements) {
+      each(elements, function (x) {
+        before(marker, x);
+      });
+    };
+    var append$1 = function (parent, elements) {
+      each(elements, function (x) {
+        append(parent, x);
+      });
+    };
+
+    var remove$1 = function (element) {
+      var dom = element.dom();
+      if (dom.parentNode !== null)
+        dom.parentNode.removeChild(dom);
+    };
+
+    var clone$1 = function (original, deep) {
+      return Element$$1.fromDom(original.dom().cloneNode(deep));
     };
     var deep = function (original) {
       return clone$1(original, true);
     };
     var shallowAs = function (original, tag) {
-      var nu = Element.fromTag(tag);
+      var nu = Element$$1.fromTag(tag);
       var attributes = clone(original);
       setAll(nu, attributes);
       return nu;
@@ -1154,97 +1132,214 @@ var lists = (function (domGlobals) {
     var mutate = function (original, tag) {
       var nu = shallowAs(original, tag);
       before(original, nu);
-      var children$1 = children(original);
-      append$1(nu, children$1);
-      remove(original);
+      var children$$1 = children(original);
+      append$1(nu, children$$1);
+      remove$1(original);
       return nu;
     };
 
-    var joinSegment = function (parent, child) {
-      append(parent.item, child.list);
-    };
-    var joinSegments = function (segments) {
-      for (var i = 1; i < segments.length; i++) {
-        joinSegment(segments[i - 1], segments[i]);
+    var global$8 = tinymce.util.Tools.resolve('tinymce.Env');
+
+    var DOM$1 = global$6.DOM;
+    var createNewTextBlock = function (editor, contentNode, blockName) {
+      var node, textBlock;
+      var fragment = DOM$1.createFragment();
+      var hasContentNode;
+      var blockElements = editor.schema.getBlockElements();
+      if (editor.settings.forced_root_block) {
+        blockName = blockName || editor.settings.forced_root_block;
       }
+      if (blockName) {
+        textBlock = DOM$1.create(blockName);
+        if (textBlock.tagName === editor.settings.forced_root_block) {
+          DOM$1.setAttribs(textBlock, editor.settings.forced_root_block_attrs);
+        }
+        if (!NodeType.isBlock(contentNode.firstChild, blockElements)) {
+          fragment.appendChild(textBlock);
+        }
+      }
+      if (contentNode) {
+        while (node = contentNode.firstChild) {
+          var nodeName = node.nodeName;
+          if (!hasContentNode && (nodeName !== 'SPAN' || node.getAttribute('data-mce-type') !== 'bookmark')) {
+            hasContentNode = true;
+          }
+          if (NodeType.isBlock(node, blockElements)) {
+            fragment.appendChild(node);
+            textBlock = null;
+          } else {
+            if (blockName) {
+              if (!textBlock) {
+                textBlock = DOM$1.create(blockName);
+                fragment.appendChild(textBlock);
+              }
+              textBlock.appendChild(node);
+            } else {
+              fragment.appendChild(node);
+            }
+          }
+        }
+      }
+      if (!editor.settings.forced_root_block) {
+        fragment.appendChild(DOM$1.create('br'));
+      } else {
+        if (!hasContentNode && (!global$8.ie || global$8.ie > 10)) {
+          textBlock.appendChild(DOM$1.create('br', { 'data-mce-bogus': '1' }));
+        }
+      }
+      return fragment;
     };
-    var appendSegments = function (head$1, tail) {
-      lift2(last(head$1), head(tail), joinSegment);
-    };
-    var createSegment = function (scope, listType) {
-      var segment = {
-        list: Element.fromTag(listType, scope),
-        item: Element.fromTag('li', scope)
+    var TextBlock = { createNewTextBlock: createNewTextBlock };
+
+    var DOM$2 = global$6.DOM;
+    var splitList = function (editor, ul, li, newBlock) {
+      var tmpRng, fragment, bookmarks, node;
+      var removeAndKeepBookmarks = function (targetNode) {
+        global$5.each(bookmarks, function (node) {
+          targetNode.parentNode.insertBefore(node, li.parentNode);
+        });
+        DOM$2.remove(targetNode);
       };
-      append(segment.list, segment.item);
-      return segment;
-    };
-    var createSegments = function (scope, entry, size) {
-      var segments = [];
-      for (var i = 0; i < size; i++) {
-        segments.push(createSegment(scope, entry.listType));
+      bookmarks = DOM$2.select('span[data-mce-type="bookmark"]', ul);
+      newBlock = newBlock || TextBlock.createNewTextBlock(editor, li);
+      tmpRng = DOM$2.createRng();
+      tmpRng.setStartAfter(li);
+      tmpRng.setEndAfter(ul);
+      fragment = tmpRng.extractContents();
+      for (node = fragment.firstChild; node; node = node.firstChild) {
+        if (node.nodeName === 'LI' && editor.dom.isEmpty(node)) {
+          DOM$2.remove(node);
+          break;
+        }
       }
-      return segments;
-    };
-    var populateSegments = function (segments, entry) {
-      for (var i = 0; i < segments.length - 1; i++) {
-        set(segments[i].item, 'list-style-type', 'none');
+      if (!editor.dom.isEmpty(fragment)) {
+        DOM$2.insertAfter(fragment, ul);
       }
-      last(segments).each(function (segment) {
-        setAll(segment.list, entry.listAttributes);
-        setAll(segment.item, entry.itemAttributes);
-        append$1(segment.item, entry.content);
+      DOM$2.insertAfter(newBlock, ul);
+      if (NodeType.isEmpty(editor.dom, li.parentNode)) {
+        removeAndKeepBookmarks(li.parentNode);
+      }
+      DOM$2.remove(li);
+      if (NodeType.isEmpty(editor.dom, ul)) {
+        DOM$2.remove(ul);
+      }
+    };
+    var SplitList = { splitList: splitList };
+
+    var liftN = function (arr, f) {
+      var r = [];
+      for (var i = 0; i < arr.length; i++) {
+        var x = arr[i];
+        if (x.isSome()) {
+          r.push(x.getOrDie());
+        } else {
+          return Option.none();
+        }
+      }
+      return Option.some(f.apply(null, r));
+    };
+
+    var fromElements = function (elements, scope) {
+      var doc = scope || document;
+      var fragment = doc.createDocumentFragment();
+      each(elements, function (element) {
+        fragment.appendChild(element.dom());
       });
+      return Element$$1.fromDom(fragment);
     };
-    var normalizeSegment = function (segment, entry) {
-      if (name(segment.list) !== entry.listType) {
-        segment.list = mutate(segment.list, entry.listType);
+
+    var isSupported = function (dom) {
+      return dom.style !== undefined;
+    };
+
+    var internalSet = function (dom, property, value$$1) {
+      if (!isString(value$$1)) {
+        console.error('Invalid call to CSS.set. Property ', property, ':: Value ', value$$1, ':: Element ', dom);
+        throw new Error('CSS value must be a string: ' + value$$1);
       }
-      setAll(segment.list, entry.listAttributes);
+      if (isSupported(dom))
+        dom.style.setProperty(property, value$$1);
+    };
+    var set$1 = function (element, property, value$$1) {
+      var dom = element.dom();
+      internalSet(dom, property, value$$1);
+    };
+
+    var createSection = function (scope, listType) {
+      var section = {
+        list: Element$$1.fromTag(listType, scope),
+        item: Element$$1.fromTag('li', scope)
+      };
+      append(section.list, section.item);
+      return section;
+    };
+    var joinSections = function (parent, appendor) {
+      append(parent.item, appendor.list);
+    };
+    var createJoinedSections = function (scope, length, listType) {
+      var sections = [];
+      var _loop_1 = function (i) {
+        var newSection = createSection(scope, listType);
+        last(sections).each(function (lastSection) {
+          return joinSections(lastSection, newSection);
+        });
+        sections.push(newSection);
+      };
+      for (var i = 0; i < length; i++) {
+        _loop_1(i);
+      }
+      return sections;
+    };
+    var normalizeSection = function (section, entry) {
+      if (name(section.list).toUpperCase() !== entry.listType) {
+        section.list = mutate(section.list, entry.listType);
+      }
+      setAll(section.list, entry.listAttributes);
     };
     var createItem = function (scope, attr, content) {
-      var item = Element.fromTag('li', scope);
+      var item = Element$$1.fromTag('li', scope);
       setAll(item, attr);
       append$1(item, content);
       return item;
     };
-    var appendItem = function (segment, item) {
-      append(segment.list, item);
-      segment.item = item;
+    var setItem = function (section, item) {
+      append(section.list, item);
+      section.item = item;
     };
-    var writeShallow = function (scope, cast, entry) {
-      var newCast = cast.slice(0, entry.depth);
-      last(newCast).each(function (segment) {
-        var item = createItem(scope, entry.itemAttributes, entry.content);
-        appendItem(segment, item);
-        normalizeSegment(segment, entry);
+    var writeShallow = function (scope, outline, entry) {
+      var newOutline = outline.slice(0, entry.depth);
+      last(newOutline).each(function (section) {
+        setItem(section, createItem(scope, entry.itemAttributes, entry.content));
+        normalizeSection(section, entry);
       });
-      return newCast;
+      return newOutline;
     };
-    var writeDeep = function (scope, cast, entry) {
-      var segments = createSegments(scope, entry, entry.depth - cast.length);
-      joinSegments(segments);
-      populateSegments(segments, entry);
-      appendSegments(cast, segments);
-      return cast.concat(segments);
+    var populateSections = function (sections, entry) {
+      last(sections).each(function (section) {
+        setAll(section.list, entry.listAttributes);
+        setAll(section.item, entry.itemAttributes);
+        append$1(section.item, entry.content);
+      });
+      for (var i = 0; i < sections.length - 1; i++) {
+        set$1(sections[i].item, 'list-style-type', 'none');
+      }
+    };
+    var writeDeep = function (scope, outline, entry) {
+      var newSections = createJoinedSections(scope, entry.depth - outline.length, entry.listType);
+      populateSections(newSections, entry);
+      liftN([
+        last(outline),
+        head(newSections)
+      ], joinSections);
+      return outline.concat(newSections);
     };
     var composeList = function (scope, entries) {
-      var cast = foldl(entries, function (cast, entry) {
-        return entry.depth > cast.length ? writeDeep(scope, cast, entry) : writeShallow(scope, cast, entry);
+      var outline = foldl(entries, function (outline, entry) {
+        return entry.depth > outline.length ? writeDeep(scope, outline, entry) : writeShallow(scope, outline, entry);
       }, []);
-      return head(cast).map(function (segment) {
-        return segment.list;
+      return head(outline).map(function (section) {
+        return section.list;
       });
-    };
-
-    var isList$1 = function (el) {
-      return is$1(el, 'OL,UL');
-    };
-    var hasFirstChildList = function (el) {
-      return firstChild(el).map(isList$1).getOr(false);
-    };
-    var hasLastChildList = function (el) {
-      return lastChild(el).map(isList$1).getOr(false);
     };
 
     var isIndented = function (entry) {
@@ -1252,23 +1347,6 @@ var lists = (function (domGlobals) {
     };
     var isSelected = function (entry) {
       return entry.isSelected;
-    };
-    var cloneItemContent = function (li) {
-      var children$1 = children(li);
-      var content = hasLastChildList(li) ? children$1.slice(0, -1) : children$1;
-      return map(content, deep);
-    };
-    var createEntry = function (li, depth, isSelected) {
-      return parent(li).filter(isElement).map(function (list) {
-        return {
-          depth: depth,
-          isSelected: isSelected,
-          content: cloneItemContent(li),
-          itemAttributes: clone(li),
-          listAttributes: clone(list),
-          listType: name(list)
-        };
-      });
     };
 
     var indentEntry = function (indentation, entry) {
@@ -1284,55 +1362,56 @@ var lists = (function (domGlobals) {
       }
     };
 
-    var hasOwnProperty = Object.prototype.hasOwnProperty;
-    var shallow = function (old, nu) {
+    var hasOwnProperty$1 = Object.prototype.hasOwnProperty;
+    var shallow$1 = function (old, nu) {
       return nu;
     };
     var baseMerge = function (merger) {
       return function () {
         var objects = new Array(arguments.length);
-        for (var i = 0; i < objects.length; i++) {
+        for (var i = 0; i < objects.length; i++)
           objects[i] = arguments[i];
-        }
-        if (objects.length === 0) {
+        if (objects.length === 0)
           throw new Error('Can\'t merge zero objects');
-        }
         var ret = {};
         for (var j = 0; j < objects.length; j++) {
           var curObject = objects[j];
-          for (var key in curObject) {
-            if (hasOwnProperty.call(curObject, key)) {
+          for (var key in curObject)
+            if (hasOwnProperty$1.call(curObject, key)) {
               ret[key] = merger(ret[key], curObject[key]);
             }
-          }
         }
         return ret;
       };
     };
-    var merge = baseMerge(shallow);
+    var merge = baseMerge(shallow$1);
 
-    var cloneListProperties = function (target, source) {
-      target.listType = source.listType;
-      target.listAttributes = merge({}, source.listAttributes);
+    var assimilateEntry = function (adherent, source) {
+      adherent.listType = source.listType;
+      adherent.listAttributes = merge({}, source.listAttributes);
     };
-    var previousSiblingEntry = function (entries, start) {
-      var depth = entries[start].depth;
-      for (var i = start - 1; i >= 0; i--) {
-        if (entries[i].depth === depth) {
-          return Option.some(entries[i]);
-        }
-        if (entries[i].depth < depth) {
-          break;
-        }
+    var normalizeShallow = function (outline, entry) {
+      var matchingEntryDepth = entry.depth - 1;
+      outline[matchingEntryDepth].each(function (matchingEntry) {
+        return assimilateEntry(entry, matchingEntry);
+      });
+      var newOutline = outline.slice(0, matchingEntryDepth);
+      newOutline.push(Option.some(entry));
+      return newOutline;
+    };
+    var normalizeDeep = function (outline, entry) {
+      var newOutline = outline.slice(0);
+      var diff = entry.depth - outline.length;
+      for (var i = 1; i < diff; i++) {
+        newOutline.push(Option.none());
       }
-      return Option.none();
+      newOutline.push(Option.some(entry));
+      return newOutline;
     };
     var normalizeEntries = function (entries) {
-      each(entries, function (entry, i) {
-        previousSiblingEntry(entries, i).each(function (matchingEntry) {
-          cloneListProperties(entry, matchingEntry);
-        });
-      });
+      foldl(entries, function (outline, entry) {
+        return entry.depth > outline.length ? normalizeDeep(outline, entry) : normalizeShallow(outline, entry);
+      }, []);
     };
 
     var Cell = function (initial) {
@@ -1353,32 +1432,72 @@ var lists = (function (domGlobals) {
       };
     };
 
+    var ListType;
+    (function (ListType) {
+      ListType['OL'] = 'OL';
+      ListType['UL'] = 'UL';
+      ListType['DL'] = 'DL';
+    }(ListType || (ListType = {})));
+    var getListType = function (list) {
+      switch (name(list)) {
+      case 'ol':
+        return Option.some(ListType.OL);
+      case 'ul':
+        return Option.some(ListType.UL);
+      case 'dl':
+        return Option.some(ListType.DL);
+      default:
+        return Option.none();
+      }
+    };
+    var isList$1 = function (el) {
+      return is$1(el, 'OL,UL,DL');
+    };
+
+    var hasFirstChildList = function (li) {
+      return firstChild(li).map(isList$1).getOr(false);
+    };
+    var hasLastChildList = function (li) {
+      return lastChild(li).map(isList$1).getOr(false);
+    };
+
+    var getItemContent = function (li) {
+      var childNodes = children(li);
+      var contentLength = childNodes.length + (hasLastChildList(li) ? -1 : 0);
+      return map(childNodes.slice(0, contentLength), deep);
+    };
+    var createEntry = function (li, depth, isSelected) {
+      var list = parent(li);
+      return {
+        depth: depth,
+        isSelected: isSelected,
+        content: getItemContent(li),
+        listType: list.bind(getListType).getOr(ListType.OL),
+        listAttributes: list.map(clone).getOr({}),
+        itemAttributes: clone(li)
+      };
+    };
     var parseItem = function (depth, itemSelection, selectionState, item) {
+      var curriedParseList = curry(parseList, depth, itemSelection, selectionState);
+      var updateSelectionState = function (itemRange) {
+        return itemSelection.each(function (selection) {
+          if (eq(itemRange === 'Start' ? selection.start : selection.end, item)) {
+            selectionState.set(itemRange === 'Start');
+          }
+        });
+      };
       return firstChild(item).filter(isList$1).fold(function () {
-        itemSelection.each(function (selection) {
-          if (eq(selection.start, item)) {
-            selectionState.set(true);
-          }
-        });
-        var currentItemEntry = createEntry(item, depth, selectionState.get());
-        itemSelection.each(function (selection) {
-          if (eq(selection.end, item)) {
-            selectionState.set(false);
-          }
-        });
-        var childListEntries = lastChild(item).filter(isList$1).map(function (list) {
-          return parseList(depth, itemSelection, selectionState, list);
-        }).getOr([]);
-        return currentItemEntry.toArray().concat(childListEntries);
-      }, function (list) {
-        return parseList(depth, itemSelection, selectionState, list);
-      });
+        updateSelectionState('Start');
+        var fromCurrentItem = createEntry(item, depth, selectionState.get());
+        updateSelectionState('End');
+        var fromChildList = lastChild(item).filter(isList$1).map(curriedParseList).getOr([]);
+        return [fromCurrentItem].concat(fromChildList);
+      }, curriedParseList);
     };
     var parseList = function (depth, itemSelection, selectionState, list) {
-      return bind(children(list), function (element) {
-        var parser = isList$1(element) ? parseList : parseItem;
-        var newDepth = depth + 1;
-        return parser(newDepth, itemSelection, selectionState, element);
+      var newDepth = depth + 1;
+      return bind(children(list), function (child$$1) {
+        return isList$1(child$$1) ? parseList(newDepth, itemSelection, selectionState, child$$1) : parseItem(newDepth, itemSelection, selectionState, child$$1);
       });
     };
     var parseLists = function (lists, itemSelection) {
@@ -1386,67 +1505,16 @@ var lists = (function (domGlobals) {
       var initialDepth = 0;
       return map(lists, function (list) {
         return {
-          sourceList: list,
-          entries: parseList(initialDepth, itemSelection, selectionState, list)
+          entries: parseList(initialDepth, itemSelection, selectionState, list),
+          sourceList: list
         };
       });
-    };
-
-    var global$8 = tinymce.util.Tools.resolve('tinymce.Env');
-
-    var createTextBlock = function (editor, contentNode) {
-      var dom = editor.dom;
-      var blockElements = editor.schema.getBlockElements();
-      var fragment = dom.createFragment();
-      var node, textBlock, blockName, hasContentNode;
-      if (editor.settings.forced_root_block) {
-        blockName = editor.settings.forced_root_block;
-      }
-      if (blockName) {
-        textBlock = dom.create(blockName);
-        if (textBlock.tagName === editor.settings.forced_root_block) {
-          dom.setAttribs(textBlock, editor.settings.forced_root_block_attrs);
-        }
-        if (!NodeType.isBlock(contentNode.firstChild, blockElements)) {
-          fragment.appendChild(textBlock);
-        }
-      }
-      if (contentNode) {
-        while (node = contentNode.firstChild) {
-          var nodeName = node.nodeName;
-          if (!hasContentNode && (nodeName !== 'SPAN' || node.getAttribute('data-mce-type') !== 'bookmark')) {
-            hasContentNode = true;
-          }
-          if (NodeType.isBlock(node, blockElements)) {
-            fragment.appendChild(node);
-            textBlock = null;
-          } else {
-            if (blockName) {
-              if (!textBlock) {
-                textBlock = dom.create(blockName);
-                fragment.appendChild(textBlock);
-              }
-              textBlock.appendChild(node);
-            } else {
-              fragment.appendChild(node);
-            }
-          }
-        }
-      }
-      if (!editor.settings.forced_root_block) {
-        fragment.appendChild(dom.create('br'));
-      } else {
-        if (!hasContentNode && (!global$8.ie || global$8.ie > 10)) {
-          textBlock.appendChild(dom.create('br', { 'data-mce-bogus': '1' }));
-        }
-      }
-      return fragment;
     };
 
     var outdentedComposer = function (editor, entries) {
       return map(entries, function (entry) {
         var content = fromElements(entry.content);
-        return Element.fromDom(createTextBlock(editor, content.dom()));
+        return Element$$1.fromDom(TextBlock.createNewTextBlock(editor, content.dom()));
       });
     };
     var indentedComposer = function (editor, entries) {
@@ -1465,8 +1533,11 @@ var lists = (function (domGlobals) {
       });
     };
     var getItemSelection = function (editor) {
-      var selectedListItems = map(Selection.getSelectedListItems(editor), Element.fromDom);
-      return lift2(find(selectedListItems, not(hasFirstChildList)), find(reverse(selectedListItems), not(hasFirstChildList)), function (start, end) {
+      var selectedListItems = map(Selection.getSelectedListItems(editor), Element$$1.fromDom);
+      return liftN([
+        find(selectedListItems, not(hasFirstChildList)),
+        find(reverse(selectedListItems), not(hasFirstChildList))
+      ], function (start, end) {
         return {
           start: start,
           end: end
@@ -1474,61 +1545,26 @@ var lists = (function (domGlobals) {
       });
     };
     var listsIndentation = function (editor, lists, indentation) {
-      var entrySets = parseLists(lists, getItemSelection(editor));
-      each(entrySets, function (entrySet) {
+      var parsedLists = parseLists(lists, getItemSelection(editor));
+      each(parsedLists, function (entrySet) {
         indentSelectedEntries(entrySet.entries, indentation);
         before$1(entrySet.sourceList, composeEntries(editor, entrySet.entries));
-        remove(entrySet.sourceList);
+        remove$1(entrySet.sourceList);
       });
     };
 
-    var DOM$1 = global$6.DOM;
-    var splitList = function (editor, ul, li) {
-      var tmpRng, fragment, bookmarks, node, newBlock;
-      var removeAndKeepBookmarks = function (targetNode) {
-        global$5.each(bookmarks, function (node) {
-          targetNode.parentNode.insertBefore(node, li.parentNode);
-        });
-        DOM$1.remove(targetNode);
-      };
-      bookmarks = DOM$1.select('span[data-mce-type="bookmark"]', ul);
-      newBlock = createTextBlock(editor, li);
-      tmpRng = DOM$1.createRng();
-      tmpRng.setStartAfter(li);
-      tmpRng.setEndAfter(ul);
-      fragment = tmpRng.extractContents();
-      for (node = fragment.firstChild; node; node = node.firstChild) {
-        if (node.nodeName === 'LI' && editor.dom.isEmpty(node)) {
-          DOM$1.remove(node);
-          break;
-        }
-      }
-      if (!editor.dom.isEmpty(fragment)) {
-        DOM$1.insertAfter(fragment, ul);
-      }
-      DOM$1.insertAfter(newBlock, ul);
-      if (NodeType.isEmpty(editor.dom, li.parentNode)) {
-        removeAndKeepBookmarks(li.parentNode);
-      }
-      DOM$1.remove(li);
-      if (NodeType.isEmpty(editor.dom, ul)) {
-        DOM$1.remove(ul);
-      }
-    };
-    var SplitList = { splitList: splitList };
-
     var outdentDlItem = function (editor, item) {
-      if (is$1(item, 'dd')) {
-        mutate(item, 'dt');
-      } else if (is$1(item, 'dt')) {
+      if (is$1(item, 'DD')) {
+        mutate(item, 'DT');
+      } else if (is$1(item, 'DT')) {
         parent(item).each(function (dl) {
           return SplitList.splitList(editor, dl.dom(), item.dom());
         });
       }
     };
     var indentDlItem = function (item) {
-      if (is$1(item, 'dt')) {
-        mutate(item, 'dd');
+      if (is$1(item, 'DT')) {
+        mutate(item, 'DD');
       }
     };
     var dlIndentation = function (editor, indentation, dlItems) {
@@ -1540,30 +1576,26 @@ var lists = (function (domGlobals) {
         });
       }
     };
-
     var selectionIndentation = function (editor, indentation) {
-      var lists = map(Selection.getSelectedListRoots(editor), Element.fromDom);
-      var dlItems = map(Selection.getSelectedDlItems(editor), Element.fromDom);
-      var isHandled = false;
-      if (lists.length || dlItems.length) {
+      var dlItems = map(Selection.getSelectedDlItems(editor), Element$$1.fromDom);
+      var lists = map(Selection.getSelectedListRoots(editor), Element$$1.fromDom);
+      if (dlItems.length || lists.length) {
         var bookmark = editor.selection.getBookmark();
-        listsIndentation(editor, lists, indentation);
         dlIndentation(editor, indentation, dlItems);
+        listsIndentation(editor, lists, indentation);
         editor.selection.moveToBookmark(bookmark);
         editor.selection.setRng(Range.normalizeRange(editor.selection.getRng()));
         editor.nodeChanged();
-        isHandled = true;
       }
-      return isHandled;
     };
     var indentListSelection = function (editor) {
-      return selectionIndentation(editor, 'Indent');
+      selectionIndentation(editor, 'Indent');
     };
     var outdentListSelection = function (editor) {
-      return selectionIndentation(editor, 'Outdent');
+      selectionIndentation(editor, 'Outdent');
     };
     var flattenListSelection = function (editor) {
-      return selectionIndentation(editor, 'Flatten');
+      selectionIndentation(editor, 'Flatten');
     };
 
     var updateListStyle = function (dom, el, detail) {
@@ -1791,7 +1823,7 @@ var lists = (function (domGlobals) {
       mergeWithAdjacentLists: mergeWithAdjacentLists
     };
 
-    var DOM$2 = global$6.DOM;
+    var DOM$3 = global$6.DOM;
     var normalizeList = function (dom, ul) {
       var sibling;
       var parentNode = ul.parentNode;
@@ -1800,10 +1832,10 @@ var lists = (function (domGlobals) {
         if (sibling && sibling.nodeName === 'LI') {
           sibling.appendChild(ul);
           if (NodeType.isEmpty(dom, parentNode)) {
-            DOM$2.remove(parentNode);
+            DOM$3.remove(parentNode);
           }
         } else {
-          DOM$2.setStyle(parentNode, 'listStyleType', 'none');
+          DOM$3.setStyle(parentNode, 'listStyleType', 'none');
         }
       }
       if (NodeType.isListNode(parentNode)) {
@@ -1896,14 +1928,10 @@ var lists = (function (domGlobals) {
       if (listNode) {
         toElm.appendChild(listNode);
       }
-      var contains = contains$1(Element.fromDom(toElm), Element.fromDom(fromElm));
-      var nestedLists = contains ? dom.getParents(fromElm, NodeType.isListNode, toElm) : [];
       dom.remove(fromElm);
-      each(nestedLists, function (list) {
-        if (NodeType.isEmpty(dom, list) && list !== dom.getRoot()) {
-          dom.remove(list);
-        }
-      });
+      if (NodeType.isEmpty(dom, ul) && ul !== dom.getRoot()) {
+        dom.remove(ul);
+      }
     };
     var mergeIntoEmptyLi = function (editor, fromLi, toLi) {
       editor.dom.$(toLi).empty();
@@ -2019,14 +2047,14 @@ var lists = (function (domGlobals) {
       backspaceDelete: backspaceDelete
     };
 
-    var get = function (editor) {
+    var get$3 = function (editor) {
       return {
         backspaceDelete: function (isForward) {
           Delete.backspaceDelete(editor, isForward);
         }
       };
     };
-    var Api = { get: get };
+    var Api = { get: get$3 };
 
     var queryListCommandState = function (editor, listName) {
       return function () {
@@ -2071,11 +2099,16 @@ var lists = (function (domGlobals) {
         if (e.keyCode !== global$3.TAB || global$3.metaKeyPressed(e)) {
           return;
         }
-        editor.undoManager.transact(function () {
-          if (e.shiftKey ? outdentListSelection(editor) : indentListSelection(editor)) {
-            e.preventDefault();
-          }
-        });
+        if (Selection.isList(editor)) {
+          e.preventDefault();
+          editor.undoManager.transact(function () {
+            if (e.shiftKey) {
+              outdentListSelection(editor);
+            } else {
+              indentListSelection(editor);
+            }
+          });
+        }
       });
     };
     var setup$1 = function (editor) {
@@ -2086,7 +2119,7 @@ var lists = (function (domGlobals) {
     };
     var Keyboard = { setup: setup$1 };
 
-    var findIndex = function (list, predicate) {
+    var findIndex$2 = function (list, predicate) {
       for (var index = 0; index < list.length; index++) {
         var element = list[index];
         if (predicate(element)) {
@@ -2099,7 +2132,7 @@ var lists = (function (domGlobals) {
       return function (e) {
         var ctrl = e.control;
         editor.on('NodeChange', function (e) {
-          var tableCellIndex = findIndex(e.parents, NodeType.isTableCellNode);
+          var tableCellIndex = findIndex$2(e.parents, NodeType.isTableCellNode);
           var parents = tableCellIndex !== -1 ? e.parents.slice(0, tableCellIndex) : e.parents;
           var lists = global$5.grep(parents, NodeType.isListNode);
           ctrl.active(lists.length > 0 && lists[0].nodeName === listName);
@@ -2144,5 +2177,5 @@ var lists = (function (domGlobals) {
 
     return Plugin;
 
-}(window));
+}());
 })();

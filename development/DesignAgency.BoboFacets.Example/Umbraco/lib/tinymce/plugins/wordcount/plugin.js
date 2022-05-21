@@ -65,8 +65,6 @@ var wordcount = (function () {
       WHITESPACE: WHITESPACE
     };
 
-    var noop = function () {
-    };
     var constant = function (value) {
       return function () {
         return value;
@@ -75,6 +73,8 @@ var wordcount = (function () {
     var never = constant(false);
     var always = constant(true);
 
+    var never$1 = never;
+    var always$1 = always;
     var none = function () {
       return NONE;
     };
@@ -82,33 +82,43 @@ var wordcount = (function () {
       var eq = function (o) {
         return o.isNone();
       };
-      var call = function (thunk) {
+      var call$$1 = function (thunk) {
         return thunk();
       };
       var id = function (n) {
         return n;
       };
+      var noop$$1 = function () {
+      };
+      var nul = function () {
+        return null;
+      };
+      var undef = function () {
+        return undefined;
+      };
       var me = {
         fold: function (n, s) {
           return n();
         },
-        is: never,
-        isSome: never,
-        isNone: always,
+        is: never$1,
+        isSome: never$1,
+        isNone: always$1,
         getOr: id,
-        getOrThunk: call,
+        getOrThunk: call$$1,
         getOrDie: function (msg) {
           throw new Error(msg || 'error: getOrDie called on none.');
         },
-        getOrNull: constant(null),
-        getOrUndefined: constant(undefined),
+        getOrNull: nul,
+        getOrUndefined: undef,
         or: id,
-        orThunk: call,
+        orThunk: call$$1,
         map: none,
-        each: noop,
+        ap: none,
+        each: noop$$1,
         bind: none,
-        exists: never,
-        forall: always,
+        flatten: none,
+        exists: never$1,
+        forall: always$1,
         filter: none,
         equals: eq,
         equals_: eq,
@@ -117,23 +127,19 @@ var wordcount = (function () {
         },
         toString: constant('none()')
       };
-      if (Object.freeze) {
+      if (Object.freeze)
         Object.freeze(me);
-      }
       return me;
     }();
 
     var typeOf = function (x) {
-      if (x === null) {
+      if (x === null)
         return 'null';
-      }
       var t = typeof x;
-      if (t === 'object' && (Array.prototype.isPrototypeOf(x) || x.constructor && x.constructor.name === 'Array')) {
+      if (t === 'object' && Array.prototype.isPrototypeOf(x))
         return 'array';
-      }
-      if (t === 'object' && (String.prototype.isPrototypeOf(x) || x.constructor && x.constructor.name === 'String')) {
+      if (t === 'object' && String.prototype.isPrototypeOf(x))
         return 'string';
-      }
       return t;
     };
     var isType = function (type) {
@@ -143,18 +149,18 @@ var wordcount = (function () {
     };
     var isFunction = isType('function');
 
-    var nativeSlice = Array.prototype.slice;
     var map = function (xs, f) {
       var len = xs.length;
       var r = new Array(len);
       for (var i = 0; i < len; i++) {
         var x = xs[i];
-        r[i] = f(x, i);
+        r[i] = f(x, i, xs);
       }
       return r;
     };
-    var from = isFunction(Array.from) ? Array.from : function (x) {
-      return nativeSlice.call(x);
+    var slice = Array.prototype.slice;
+    var from$1 = isFunction(Array.from) ? Array.from : function (x) {
+      return slice.call(x);
     };
 
     var SETS$1 = UnicodeData.SETS;

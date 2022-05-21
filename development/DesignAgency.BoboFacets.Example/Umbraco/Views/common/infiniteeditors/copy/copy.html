@@ -2,7 +2,7 @@
 
     <umb-editor-view>
 
-        <form novalidate name="copyNodesForm" class="form-horizontal" val-form-manager>
+        <form novalidate name="dataTypeSettingsForm" val-form-manager>
     
             <umb-editor-header
                 name="model.title"
@@ -15,10 +15,6 @@
             <umb-editor-container>
                 <umb-box>
                     <umb-box-content>
-                        <p class="abstract">
-                            <localize key="actions_infiniteEditorChooseWhereToCopy">Choose where to copy the selected item(s)</localize>
-                        </p>
-
                         <div ng-hide="miniListView">
                             <div class="umb-control-group">
                                 <umb-tree-search-box
@@ -63,16 +59,11 @@
                             </umb-mini-list-view>
                         </div>
                     
-                        <umb-pane>
-                            <umb-control-group localize="label" label="@defaultdialogs_relateToOriginalLabel">
-                                <umb-toggle label-position="left" checked="model.relateToOriginal" on-click="vm.onToggle('relate')"></umb-toggle>
-                            </umb-control-group>
-                        </umb-pane>
-                        <umb-pane>
-                            <umb-control-group localize="label" label="@defaultdialogs_includeDescendants">
-                                <umb-toggle label-position="left" checked="model.includeDescendants" on-click="vm.onToggle('descendants')"></umb-toggle>
-                            </umb-control-group>
-                        </umb-pane>
+                        <div class="umb-control-group -no-border">
+                            <div class="flex">
+                                <umb-checkbox input-id="relateToOriginal" model="model.relateToOriginal" text="{{vm.labels.relateToOriginal}}" />
+                            </div>
+                        </div>
                     </umb-box-content>
                 </umb-box>
             </umb-editor-container>
@@ -91,8 +82,7 @@
                         button-style="success"
                         label-key="general_submit"
                         state="vm.saveButtonState"
-                        action="vm.submit(model)"
-                        disabled="!model.target">
+                        action="vm.submit(model)">
                     </umb-button>
                 </umb-editor-footer-content-right>
             </umb-editor-footer>

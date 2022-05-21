@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using BoboBrowse.Net;
 using BoboBrowse.Net.Facets;
 using BoboBrowse.Net.Facets.Data;
 using BoboBrowse.Net.Facets.Impl;
-using DesignAgency.BoboFacets.Extensions;
 using DesignAgency.BoboFacets.Models;
 using Lucene.Net.Documents;
 using Umbraco.Core;

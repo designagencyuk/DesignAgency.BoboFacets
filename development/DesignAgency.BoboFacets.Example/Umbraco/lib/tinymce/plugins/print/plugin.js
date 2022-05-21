@@ -4,15 +4,9 @@ var print = (function () {
 
     var global = tinymce.util.Tools.resolve('tinymce.PluginManager');
 
-    var global$1 = tinymce.util.Tools.resolve('tinymce.Env');
-
     var register = function (editor) {
       editor.addCommand('mcePrint', function () {
-        if (global$1.ie && global$1.ie <= 11) {
-          editor.getDoc().execCommand('print', false, null);
-        } else {
-          editor.getWin().print();
-        }
+        editor.getWin().print();
       });
     };
     var Commands = { register: register };

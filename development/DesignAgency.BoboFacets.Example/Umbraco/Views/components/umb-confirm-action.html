@@ -6,11 +6,11 @@
      '-left': direction === 'left'}"
      on-outside-click="clickCancel()">
 
-        <button class="umb_confirm-action__overlay-action -confirm btn-reset" ng-click="clickConfirm()" localize="title" title="@buttons_confirmActionConfirm" type="button">
+        <a class="umb_confirm-action__overlay-action -confirm" href="" ng-click="clickConfirm()" localize="title" title="@buttons_confirmActionConfirm">
             <i class="icon-check"></i>
-        </button>
+        </a>
 
-        <button class="umb_confirm-action__overlay-action -cancel btn-reset"  ng-click="clickCancel()" localize="title" title="@buttons_confirmActionCancel" type="button">
+        <a class="umb_confirm-action__overlay-action -cancel" href="" ng-click="clickCancel()" localize="title" title="@buttons_confirmActionCancel">
             <i class="icon-delete"></i>
-        </button>
+        </a>
 </div>

@@ -132,7 +132,7 @@ var advlist = (function () {
       if (styles.length > 0) {
         addSplitButton(editor, id, tooltip, cmd, nodeName, styles);
       } else {
-        addButton(editor, id, tooltip, cmd, nodeName);
+        addButton(editor, id, tooltip, cmd, nodeName, styles);
       }
     };
     var register$1 = function (editor) {

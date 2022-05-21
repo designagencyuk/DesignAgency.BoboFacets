@@ -2542,7 +2542,6 @@ When building a custom infinite editor view you can use the same components as a
      *
      * @param {Object} editor rendering options
      * @param {Boolean} editor.multiPicker Pick one or multiple items
-     * @param {Int} editor.startNodeId Set the startnode of the picker (optional)
      * @param {Function} editor.submit Callback function when the submit button is clicked. Returns the editor model object
      * @param {Function} editor.close Callback function when the close button is clicked.
      *
@@ -2550,8 +2549,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function contentPicker(editor) {
                 editor.view = 'views/common/infiniteeditors/treepicker/treepicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 editor.section = 'content';
                 editor.treeAlias = 'content';
                 open(editor);
@@ -2573,8 +2571,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function contentTypePicker(editor) {
                 editor.view = 'views/common/infiniteeditors/treepicker/treepicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 editor.section = 'settings';
                 editor.treeAlias = 'documentTypes';
                 open(editor);
@@ -2596,8 +2593,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function mediaTypePicker(editor) {
                 editor.view = 'views/common/infiniteeditors/treepicker/treepicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 editor.section = 'settings';
                 editor.treeAlias = 'mediaTypes';
                 open(editor);
@@ -2619,8 +2615,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function memberTypePicker(editor) {
                 editor.view = 'views/common/infiniteeditors/treepicker/treepicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 editor.section = 'settings';
                 editor.treeAlias = 'memberTypes';
                 open(editor);
@@ -2640,8 +2635,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function copy(editor) {
                 editor.view = 'views/common/infiniteeditors/copy/copy.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -2659,8 +2653,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function move(editor) {
                 editor.view = 'views/common/infiniteeditors/move/move.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -2676,8 +2669,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function embed(editor) {
                 editor.view = 'views/common/infiniteeditors/embed/embed.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -2694,8 +2686,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function rollback(editor) {
                 editor.view = 'views/common/infiniteeditors/rollback/rollback.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -2714,8 +2705,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function linkPicker(editor) {
                 editor.view = 'views/common/infiniteeditors/linkpicker/linkpicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -2744,7 +2734,6 @@ When building a custom infinite editor view you can use the same components as a
      * @description
      * Opens a media picker in infinite editing, the submit callback returns an array of selected media items
      * @param {Object} editor rendering options
-     * @param {Int} editor.startNodeId Set the startnode of the picker (optional)
      * @param {Boolean} editor.multiPicker Pick one or multiple items
      * @param {Boolean} editor.onlyImages Only display files that have an image file-extension
      * @param {Boolean} editor.disableFolderSelect Disable folder selection
@@ -2756,8 +2745,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function mediaPicker(editor) {
                 editor.view = 'views/common/infiniteeditors/mediapicker/mediapicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 editor.updatedMediaNodes = [];
                 open(editor);
             }
@@ -2777,8 +2765,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function iconPicker(editor) {
                 editor.view = 'views/common/infiniteeditors/iconpicker/iconpicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -2789,11 +2776,8 @@ When building a custom infinite editor view you can use the same components as a
      * @description
      * Opens the document type editor in infinite editing, the submit callback returns the alias of the saved document type.
      * @param {Object} editor rendering options
-     * @param {Number} editor.id Indicates the ID of the document type to be edited. Alternatively the ID may be set to `-1` in combination with `create` being set to `true` to open the document type editor for creating a new document type.
-     * @param {Boolean} editor.create Set to `true` to open the document type editor for creating a new document type.
-     * @param {Boolean} editor.noTemplate If `true` and in combination with `create` being set to `true`, the document type editor will not create a corresponding template by default. This is similar to selecting the "Document Type without a template" in the Create dialog.
-     * @param {Boolean} editor.isElement If `true` and in combination with `create` being set to `true`, the "Is an Element type" option will be selected by default in the document type editor.
-     * @param {Boolean} editor.allowVaryByCulture If `true` and in combination with `create`, the "Allow varying by culture" option will be selected by default in the document type editor.
+     * @param {Callback} editor.id Indicates the ID of the document type to be edited. Alternatively the ID may be set to `-1` in combination with `create` being set to `true` to open the document type editor for creating a new document type.
+     * @param {Callback} editor.create Set to `true` to open the document type editor for creating a new document type.
      * @param {Callback} editor.submit Submits the editor.
      * @param {Callback} editor.close Closes the editor.
      * @returns {Object} editor object
@@ -2816,38 +2800,6 @@ When building a custom infinite editor view you can use the same components as a
      */
             function mediaTypeEditor(editor) {
                 editor.view = 'views/mediatypes/edit.html';
-                open(editor);
-            }
-            /**
-     * @ngdoc method
-     * @name umbraco.services.editorService#memberTypeEditor
-     * @methodOf umbraco.services.editorService
-     *
-     * @description
-     * Opens the member type editor in infinite editing, the submit callback returns the saved member type
-     * @param {Object} editor rendering options
-     * @param {Callback} editor.submit Submits the editor
-     * @param {Callback} editor.close Closes the editor
-     * @returns {Object} editor object
-     */
-            function memberTypeEditor(editor) {
-                editor.view = 'views/membertypes/edit.html';
-                open(editor);
-            }
-            /**
-     * @ngdoc method
-     * @name umbraco.services.editorService#memberTypeEditor
-     * @methodOf umbraco.services.editorService
-     *
-     * @description
-     * Opens the member type editor in infinite editing, the submit callback returns the saved member type
-     * @param {Object} editor rendering options
-     * @param {Callback} editor.submit Submits the editor
-     * @param {Callback} editor.close Closes the editor
-     * @returns {Object} editor object
-     */
-            function memberTypeEditor(editor) {
-                editor.view = 'views/membertypes/edit.html';
                 open(editor);
             }
             /**
@@ -2883,8 +2835,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function treePicker(editor) {
                 editor.view = 'views/common/infiniteeditors/treepicker/treepicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -2901,8 +2852,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function nodePermissions(editor) {
                 editor.view = 'views/common/infiniteeditors/nodepermissions/nodepermissions.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -2919,8 +2869,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function insertCodeSnippet(editor) {
                 editor.view = 'views/common/infiniteeditors/insertcodesnippet/insertcodesnippet.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -2937,8 +2886,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function userGroupPicker(editor) {
                 editor.view = 'views/common/infiniteeditors/usergrouppicker/usergrouppicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -2972,8 +2920,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function sectionPicker(editor) {
                 editor.view = 'views/common/infiniteeditors/sectionpicker/sectionpicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -2990,8 +2937,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function insertField(editor) {
                 editor.view = 'views/common/infiniteeditors/insertfield/insertfield.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -3008,8 +2954,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function templateSections(editor) {
                 editor.view = 'views/common/infiniteeditors/templatesections/templatesections.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -3026,8 +2971,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function userPicker(editor) {
                 editor.view = 'views/common/infiniteeditors/userpicker/userpicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -3048,8 +2992,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function itemPicker(editor) {
                 editor.view = 'views/common/infiniteeditors/itempicker/itempicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -3066,8 +3009,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function macroPicker(editor) {
                 editor.view = 'views/common/infiniteeditors/macropicker/macropicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -3086,8 +3028,7 @@ When building a custom infinite editor view you can use the same components as a
      */
             function memberGroupPicker(editor) {
                 editor.view = 'views/common/infiniteeditors/membergrouppicker/membergrouppicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 open(editor);
             }
             /**
@@ -3107,8 +3048,7 @@ When building a custom infinite editor view you can use the same components as a
     */
             function memberPicker(editor) {
                 editor.view = 'views/common/infiniteeditors/treepicker/treepicker.html';
-                if (!editor.size)
-                    editor.size = 'small';
+                editor.size = 'small';
                 editor.section = 'member';
                 editor.treeAlias = 'member';
                 open(editor);
@@ -3196,7 +3136,6 @@ When building a custom infinite editor view you can use the same components as a
                 iconPicker: iconPicker,
                 documentTypeEditor: documentTypeEditor,
                 mediaTypeEditor: mediaTypeEditor,
-                memberTypeEditor: memberTypeEditor,
                 queryBuilder: queryBuilder,
                 treePicker: treePicker,
                 nodePermissions: nodePermissions,
@@ -3230,7 +3169,7 @@ When building a custom infinite editor view you can use the same components as a
  *
  * it is possible to modify this object, so should be used with care
  */
-    angular.module('umbraco.services').factory('editorState', function ($rootScope, eventsService) {
+    angular.module('umbraco.services').factory('editorState', function ($rootScope) {
         var current = null;
         var state = {
             /**
@@ -3247,7 +3186,6 @@ When building a custom infinite editor view you can use the same components as a
      */
             set: function set(entity) {
                 current = entity;
-                eventsService.emit('editorState.changed', { entity: entity });
             },
             /**
      * @ngdoc function
@@ -3369,7 +3307,7 @@ When building a custom infinite editor view you can use the same components as a
         var mgr = {
             /**
      * @ngdoc function
-     * @name umbraco.services.fileManager#setFiles
+     * @name umbraco.services.fileManager#addFiles
      * @methodOf umbraco.services.fileManager
      * @function
      *
@@ -4520,7 +4458,7 @@ When building a custom infinite editor view you can use the same components as a
                         if (elt.nodeType === 3) {
                             elt = elt.parentNode;
                         }
-                        if (elt.tagName === 'INPUT' || elt.tagName === 'TEXTAREA' || elt.hasAttribute('disable-hotkeys')) {
+                        if (elt.tagName === 'INPUT' || elt.tagName === 'TEXTAREA') {
                             //This exits the Find loop
                             return true;
                         }
@@ -6859,7 +6797,7 @@ When building a custom infinite editor view you can use the same components as a
                     break;
                 case 1:
                     //info
-                    this.info(args.header, args.message);
+                    this.success(args.header, args.message);
                     break;
                 case 2:
                     //error
@@ -7101,7 +7039,6 @@ When building a custom infinite editor view you can use the same components as a
                 open(overlay);
             }
             function confirmDelete(overlay) {
-                overlay.confirmType = 'delete';
                 confirm(overlay);
             }
             var service = {
@@ -8869,7 +8806,7 @@ When building a custom infinite editor view you can use the same components as a
      * @methodOf umbraco.services.tinyMceService
      *
      * @description
-     * Creates the umbraco insert embedded media tinymce plugin
+     * Creates the umbrco insert embedded media tinymce plugin
      *
      * @param {Object} editor the TinyMCE editor instance
      */
@@ -8917,8 +8854,7 @@ When building a custom infinite editor view you can use the same components as a
                     'data-embed-constrain': embed.constrain,
                     'contenteditable': false
                 }, embed.preview);
-                // Only replace if activeElement is an Embed element.
-                if (activeElement && activeElement.nodeName.toUpperCase() === 'DIV' && activeElement.classList.contains('embeditem')) {
+                if (activeElement) {
                     activeElement.replaceWith(wrapper);    // directly replaces the html node
                 } else {
                     editor.selection.setNode(wrapper);
@@ -8943,7 +8879,7 @@ When building a custom infinite editor view you can use the same components as a
      * @methodOf umbraco.services.tinyMceService
      *
      * @description
-     * Creates the umbraco insert media tinymce plugin
+     * Creates the umbrco insert media tinymce plugin
      *
      * @param {Object} editor the TinyMCE editor instance
      */
@@ -9047,7 +8983,7 @@ When building a custom infinite editor view you can use the same components as a
      * @methodOf umbraco.services.tinyMceService
      *
      * @description
-     * Creates the insert umbraco macro tinymce plugin
+     * Creates the insert umbrco macro tinymce plugin
      *
      * @param {Object} editor the TinyMCE editor instance
      */
@@ -9875,35 +9811,29 @@ When building a custom infinite editor view you can use the same components as a
                 setTourStatuses(tours).then(function () {
                     var groupedTours = [];
                     tours.forEach(function (item) {
-                        if (item.contentType === null || item.contentType === '') {
-                            var groupExists = false;
-                            var newGroup = {
-                                'group': '',
-                                'tours': []
-                            };
-                            groupedTours.forEach(function (group) {
-                                // extend existing group if it is already added
-                                if (group.group === item.group) {
-                                    if (item.groupOrder) {
-                                        group.groupOrder = item.groupOrder;
-                                    }
-                                    groupExists = true;
-                                    if (item.hidden === false) {
-                                        group.tours.push(item);
-                                    }
-                                }
-                            });
-                            // push new group to array if it doesn't exist
-                            if (!groupExists) {
-                                newGroup.group = item.group;
+                        var groupExists = false;
+                        var newGroup = {
+                            'group': '',
+                            'tours': []
+                        };
+                        groupedTours.forEach(function (group) {
+                            // extend existing group if it is already added
+                            if (group.group === item.group) {
                                 if (item.groupOrder) {
-                                    newGroup.groupOrder = item.groupOrder;
+                                    group.groupOrder = item.groupOrder;
                                 }
-                                if (item.hidden === false) {
-                                    newGroup.tours.push(item);
-                                    groupedTours.push(newGroup);
-                                }
+                                groupExists = true;
+                                group.tours.push(item);
                             }
+                        });
+                        // push new group to array if it doesn't exist
+                        if (!groupExists) {
+                            newGroup.group = item.group;
+                            if (item.groupOrder) {
+                                newGroup.groupOrder = item.groupOrder;
+                            }
+                            newGroup.tours.push(item);
+                            groupedTours.push(newGroup);
                         }
                     });
                     deferred.resolve(groupedTours);
@@ -9926,23 +9856,6 @@ When building a custom infinite editor view you can use the same components as a
                 setTourStatuses(tours).then(function () {
                     var tour = _.findWhere(tours, { alias: tourAlias });
                     deferred.resolve(tour);
-                });
-                return deferred.promise;
-            }
-            /**
-    * @ngdoc method
-    * @name umbraco.services.tourService#getToursForDoctype
-    * @methodOf umbraco.services.tourService
-    *
-    * @description
-    * Returns a promise of the tours found by documenttype alias.
-    * @param {Object} doctypeAlias The doctype alias for which  the tours which should be returned
-    * @returns {Array} An array of tour objects for the doctype
-    */
-            function getToursForDoctype(doctypeAlias) {
-                var deferred = $q.defer();
-                tourResource.getToursForDoctype(doctypeAlias).then(function (tours) {
-                    deferred.resolve(tours);
                 });
                 return deferred.promise;
             }
@@ -10015,8 +9928,7 @@ When building a custom infinite editor view you can use the same components as a
                 completeTour: completeTour,
                 getCurrentTour: getCurrentTour,
                 getGroupedTours: getGroupedTours,
-                getTourByAlias: getTourByAlias,
-                getToursForDoctype: getToursForDoctype
+                getTourByAlias: getTourByAlias
             };
             return service;
         }
@@ -11745,7 +11657,7 @@ When building a custom infinite editor view you can use the same components as a
         angular.module('umbraco.services').factory('urlHelper', urlHelper);
     }());
     'use strict';
-    angular.module('umbraco.services').factory('userService', function ($rootScope, eventsService, $q, $location, requestRetryQueue, authResource, emailMarketingResource, $timeout, angularHelper) {
+    angular.module('umbraco.services').factory('userService', function ($rootScope, eventsService, $q, $location, requestRetryQueue, authResource, $timeout, angularHelper) {
         var currentUser = null;
         var lastUserId = null;
         //this tracks the last date/time that the user's remainingAuthSeconds was updated from the server
@@ -11963,10 +11875,6 @@ When building a custom infinite editor view you can use the same components as a
             /** Called whenever a server request is made that contains a x-umb-user-seconds response header for which we can update the user's remaining timeout seconds */
             setUserTimeout: function setUserTimeout(newTimeout) {
                 setUserTimeoutInternal(newTimeout);
-            },
-            /** Calls out to a Remote Azure Function to deal with email marketing service */
-            addUserToEmailMarketing: function addUserToEmailMarketing(user) {
-                return emailMarketingResource.postAddUserToEmailMarketing(user);
             }
         };
     });
@@ -12304,30 +12212,6 @@ When building a custom infinite editor view you can use the same components as a
         };
     }
     angular.module('umbraco.services').factory('umbPropEditorHelper', umbPropEditorHelper);
-    'use strict';
-    (function () {
-        'use strict';
-        function validationMessageService($q, localizationService) {
-            // Gets the message to use for when a mandatory field isn't completed.
-            // Will either use the one provided on the property type's validation object
-            // or a localised default.
-            function getMandatoryMessage(validation) {
-                if (!validation) {
-                    return $q.when('');
-                }
-                if (validation.mandatoryMessage) {
-                    return $q.when(validation.mandatoryMessage);
-                } else {
-                    return localizationService.localize('general_required').then(function (value) {
-                        return $q.when(value);
-                    });
-                }
-            }
-            var service = { getMandatoryMessage: getMandatoryMessage };
-            return service;
-        }
-        angular.module('umbraco.services').factory('validationMessageService', validationMessageService);
-    }());
     'use strict';
     /**
  * @ngdoc service
